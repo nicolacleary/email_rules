@@ -1,8 +1,18 @@
 import pytest
 
-from email_rules.core.type_defs import Email
+from pydantic import ValidationError
+
+from email_rules.core.type_defs import Email, EmailAddress, EmailFrom, EmailTo, EmailSubject
 
 
 @pytest.fixture
 def generic_email() -> Email:
-    return Email()
+    try:
+        return Email(
+            email_from=EmailFrom(EmailAddress("from@example.com")),
+            email_to=[EmailTo(EmailAddress("to_1@example.com")), EmailTo(EmailAddress("to_2@example.com"))],
+            email_subject=EmailSubject("Subject 1"),
+        )
+    except ValidationError as err:
+        print(err.errors())
+        raise err
