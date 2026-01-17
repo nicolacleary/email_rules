@@ -1,0 +1,6 @@
+{% if extensions -%}
+{{ extensions }}
+{% endif -%}
+{% for rule in rendered_rules %}
+{{ rule }}
+{% endfor %}

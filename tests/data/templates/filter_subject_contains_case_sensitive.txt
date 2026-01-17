@@ -1,0 +1,1 @@
+header :contains :comparator "i;octet" "subject" "Some Text"

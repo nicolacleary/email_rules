@@ -1,0 +1,5 @@
+require ["fileinto", "include", "environment", "variables", "relational", "comparator-i;ascii-numeric", "spamtest"];
+
+some rule 1;
+
+some rule 2;

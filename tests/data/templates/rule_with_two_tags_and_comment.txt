@@ -1,0 +1,5 @@
+# Some comment
+if header :is "subject" "important" {
+    fileinto "tag-1";
+    fileinto "tag-2";
+}

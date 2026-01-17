@@ -1,12 +1,12 @@
 venv:
-	python -m venv .venv
-	.venv/Scripts/pip.exe install -e .[dev]
+	python3 -m venv .venv
+	.venv/bin/pip install -e .[dev]
 
 test:
-	.venv/Scripts/pytest.exe tests -v
+	.venv/bin/pytest tests -v
 
 format_and_lint:
-	.venv/Scripts/ruff.exe format .
-	.venv/Scripts/ruff.exe check . --fix
-	.venv/Scripts/flake8.exe .
-	.venv/Scripts/mypy.exe .
+	.venv/bin/ruff format .
+	.venv/bin/ruff check . --fix
+	.venv/bin/flake8 .
+	.venv/bin/mypy .

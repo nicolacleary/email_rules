@@ -1,0 +1,1 @@
+allof (abc, def, ghi)

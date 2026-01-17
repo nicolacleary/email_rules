@@ -1,0 +1,8 @@
+{%- if comment -%}
+# {{ comment }}
+{% endif -%}
+if {{ condition }} {
+{%- for action in actions %}
+    {{ action }}
+{%- endfor %}
+}

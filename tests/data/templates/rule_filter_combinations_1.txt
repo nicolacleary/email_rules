@@ -1,0 +1,1 @@
+allof ((not header :is "subject" "important"), anyof (address :is "to" "abc@example.com", address :is "to" "def@example.com"))

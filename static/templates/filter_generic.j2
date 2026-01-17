@@ -1,0 +1,1 @@
+{{ section_name }} :{{ operation }} {% if case_sensitive -%} :comparator "i;octet" "{{ section_part }}" "{{ text }}" {%- else -%} "{{ section_part }}" "{{ text | lower }}" {%- endif -%}
