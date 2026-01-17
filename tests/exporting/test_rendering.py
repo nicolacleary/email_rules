@@ -6,7 +6,7 @@ from email_rules.core.type_defs import EmailAddress, EmailFrom, EmailSubject, Em
 from email_rules.rules.basic_actions import RuleActionAddTag
 from email_rules.rules.basic_filters import RuleFromEq, RuleSubjectContains, RuleSubjectEq, RuleToEq
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter
-from email_rules.exporting.rendering import render_extensions, render_rule, render_rule_action, render_rule_filter
+from email_rules.exporting.rendering import SieveRenderer
 from email_rules.exporting.type_defs import SieveExtension
 
 from tests.exporting.common import TEST_DATA_TEMPLATES_DIR
@@ -24,7 +24,7 @@ from tests.exporting.common import TEST_DATA_TEMPLATES_DIR
 )
 def test_render_rule_action(action: RuleAction, expected_output: Path) -> None:
     # Just a placeholder to test the function, since this should be a 1-1 rendering
-    assert render_rule_action(action) == expected_output.read_text()
+    assert SieveRenderer().render_rule_action(action) == expected_output.read_text()
 
 
 @pytest.mark.parametrize(
@@ -79,7 +79,7 @@ def test_render_rule_action(action: RuleAction, expected_output: Path) -> None:
     ],
 )
 def test_render_rule_filter(rule: RuleFilter, expected_output: Path) -> None:
-    assert render_rule_filter(rule) == expected_output.read_text()
+    assert SieveRenderer().render_rule_filter(rule) == expected_output.read_text()
 
 
 @pytest.mark.parametrize(
@@ -99,7 +99,7 @@ def test_render_rule_filter(rule: RuleFilter, expected_output: Path) -> None:
     ],
 )
 def test_render_rule(rule: Rule, expected_output: Path) -> None:
-    assert render_rule(rule) == expected_output.read_text()
+    assert SieveRenderer().render_rule(rule) == expected_output.read_text()
 
 
 @pytest.mark.parametrize(
@@ -132,4 +132,4 @@ def test_render_rule(rule: Rule, expected_output: Path) -> None:
     ],
 )
 def test_render_extensions(dependencies: list[SieveExtension], expected: str | None) -> None:
-    assert render_extensions(dependencies) == expected
+    assert SieveRenderer().render_extensions(dependencies) == expected
