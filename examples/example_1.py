@@ -8,8 +8,7 @@ from email_rules.rules.basic_actions import (
     RuleActionStopProcessingCurrentFile,
 )
 from email_rules.rules.basic_filters import RuleFromEq, RuleSubjectContains
-from email_rules.exporting.rendering import SieveRenderer
-from email_rules.exporting.type_defs import RenderedRuleFilter, SieveExtension
+from email_rules.exporting import RenderedRuleFilter, SieveExtension, SieveRenderer
 from email_rules.simulation_framework.type_defs import RuleFile
 from email_rules.simulation_framework.rule_simulation import IterableClass
 

@@ -12,8 +12,7 @@ from email_rules.rules.basic_actions import (
 )
 from email_rules.rules.basic_filters import RuleFromEq, RuleSubjectContains, RuleSubjectEq, RuleToEq
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter
-from email_rules.exporting.rendering import SieveRenderer
-from email_rules.exporting.type_defs import SieveExtension
+from email_rules.exporting import SieveExtension, SieveRenderer
 
 from tests.exporting.common import TEST_DATA_TEMPLATES_DIR
 
