@@ -1,10 +1,15 @@
+from typing import Sequence
+
 import pytest
 
-from email_rules.core.type_defs import Email
-from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter
+from email_rules.core.type_defs import Email, EmailState
+from email_rules.rules.type_defs import Rule, RuleAction, RuleActionApplicationState, RuleApplication, RuleFilter
 from email_rules.rules.basic_actions import RuleActionStopProcessingAllFiles, RuleActionStopProcessingCurrentFile
 
 from tests.rules.common import ALWAYS_FALSE, ALWAYS_TRUE, RuleActionDoNothingAndTrackCalls
+
+
+RuleInfo = tuple[list[int], RuleFilter]
 
 
 @pytest.fixture
@@ -14,7 +19,10 @@ def do_nothing_actions() -> list[RuleActionDoNothingAndTrackCalls]:
 
 
 def create_rule(
-    action_order: list[int], filter_expr: RuleFilter, do_nothing_actions: list[RuleActionDoNothingAndTrackCalls]
+    action_order: Sequence[int],
+    filter_expr: RuleFilter,
+    do_nothing_actions: list[RuleActionDoNothingAndTrackCalls],
+    comment: str | None = None,
 ) -> Rule:
     actions: list[RuleAction] = []
     for i in action_order:
@@ -26,7 +34,16 @@ def create_rule(
             case _:
                 actions.append(do_nothing_actions[i])
 
-    return Rule(filter_expr=filter_expr, actions=actions)
+    return Rule(filter_expr=filter_expr, actions=actions, comment=comment)
+
+
+def create_rules(
+    rule_info: Sequence[RuleInfo], do_nothing_actions: list[RuleActionDoNothingAndTrackCalls]
+) -> Sequence[Rule]:
+    return [
+        create_rule(action_order, filter_expr, do_nothing_actions, comment=f"rule_{i}")
+        for i, (action_order, filter_expr) in enumerate(rule_info)
+    ]
 
 
 class TestApply:
@@ -101,3 +118,171 @@ class TestApply:
         rule = create_rule(action_order, ALWAYS_TRUE, do_nothing_actions)
         Rule.apply_rules_to_email(generic_email, [rule])
         assert RuleActionDoNothingAndTrackCalls.calls == applied
+
+    @pytest.mark.parametrize(
+        "action_orders, applied",
+        [
+            pytest.param([], [], id="no_rules"),
+            pytest.param([[0], [1]], [0, 1], id="apply_two"),
+            pytest.param([[0], [-1], [1]], [0], id="stop_all_files_after_first"),
+            pytest.param([[0], [-2], [1]], [0], id="stop_current_file_after_first"),
+        ],
+    )
+    def test_interrupt_multiple_rules(
+        self,
+        action_orders: list[list[int]],
+        applied: list[int],
+        generic_email: Email,
+        do_nothing_actions: list[RuleActionDoNothingAndTrackCalls],
+    ) -> None:
+        rule_info = [(action_order, ALWAYS_TRUE) for action_order in action_orders]
+        rules = create_rules(rule_info, do_nothing_actions)
+        Rule.apply_rules_to_email(generic_email, rules)
+        assert RuleActionDoNothingAndTrackCalls.calls == applied
+
+    @pytest.mark.parametrize(
+        "rule_info, expected_states",
+        [
+            pytest.param([], [RuleApplication.create_initial_state()], id="empty"),
+            pytest.param(
+                [
+                    ([], ALWAYS_TRUE),
+                ],
+                [
+                    RuleApplication.create_initial_state(),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        current_rule="<rule_0 filter_expr=TRUE, actions=[]>",
+                        current_rule_applied=True,
+                        current_action=None,
+                    ),
+                ],
+                id="one_rule_no_actions",
+            ),
+            pytest.param(
+                [
+                    ([1], ALWAYS_TRUE),
+                ],
+                [
+                    RuleApplication.create_initial_state(),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_1]>",
+                        current_rule_applied=True,
+                        current_action="DO_NOTHING_1",
+                    ),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_1]>",
+                        current_rule_applied=True,
+                        current_action=None,
+                    ),
+                ],
+                id="one_rule_one_action",
+            ),
+            pytest.param(
+                [
+                    ([0, 1, 2], ALWAYS_TRUE),
+                    ([2, 1, 0], ALWAYS_FALSE),
+                ],
+                [
+                    RuleApplication.create_initial_state(),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0, DO_NOTHING_1, DO_NOTHING_2]>",
+                        current_rule_applied=True,
+                        current_action="DO_NOTHING_0",
+                    ),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0, DO_NOTHING_1, DO_NOTHING_2]>",
+                        current_rule_applied=True,
+                        current_action="DO_NOTHING_1",
+                    ),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0, DO_NOTHING_1, DO_NOTHING_2]>",
+                        current_rule_applied=True,
+                        current_action="DO_NOTHING_2",
+                    ),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0, DO_NOTHING_1, DO_NOTHING_2]>",
+                        current_rule_applied=True,
+                        current_action=None,
+                    ),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        current_rule="<rule_1 filter_expr=FALSE, actions=[DO_NOTHING_2, DO_NOTHING_1, DO_NOTHING_0]>",
+                        current_rule_applied=False,
+                        current_action=None,
+                    ),
+                ],
+                id="two_rules_multiple_actions_skip_second",
+            ),
+            pytest.param(
+                [
+                    ([0], ALWAYS_TRUE),
+                    ([1, -1, 1], ALWAYS_TRUE),
+                    ([2], ALWAYS_TRUE),
+                ],
+                [
+                    RuleApplication.create_initial_state(),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0]>",
+                        current_rule_applied=True,
+                        current_action="DO_NOTHING_0",
+                    ),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0]>",
+                        current_rule_applied=True,
+                        current_action=None,
+                    ),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        current_rule="<rule_1 filter_expr=TRUE, actions=[DO_NOTHING_1, STOP_ALL_FILES, DO_NOTHING_1]>",
+                        current_rule_applied=True,
+                        current_action="DO_NOTHING_1",
+                    ),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.STOP_PROCESSING_ALL_FILES,
+                        current_rule="<rule_1 filter_expr=TRUE, actions=[DO_NOTHING_1, STOP_ALL_FILES, DO_NOTHING_1]>",
+                        current_rule_applied=True,
+                        current_action="STOP_ALL_FILES",
+                    ),
+                    RuleApplication(
+                        email_state=EmailState.create_initial_state(),
+                        rule_application_state=RuleActionApplicationState.STOP_PROCESSING_ALL_FILES,
+                        current_rule="<rule_1 filter_expr=TRUE, actions=[DO_NOTHING_1, STOP_ALL_FILES, DO_NOTHING_1]>",
+                        current_rule_applied=True,
+                        current_action=None,
+                    ),
+                ],
+                id="three_rules_end_after_second",
+            ),
+        ],
+    )
+    def test_iterative_application(
+        self,
+        rule_info: list[RuleInfo],
+        expected_states: list[RuleApplication],
+        generic_email: Email,
+        do_nothing_actions: list[RuleActionDoNothingAndTrackCalls],
+    ) -> None:
+        rules = create_rules(rule_info, do_nothing_actions)
+        all_states = list(Rule.apply_rules_to_email_iteratively(generic_email, rules))
+        assert all_states == expected_states

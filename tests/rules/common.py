@@ -33,6 +33,9 @@ class RuleActionDoNothingAndTrackCalls(RuleAction):
         self.calls.append(self.instance)
         return email_state
 
+    def __repr__(self) -> str:
+        return f"DO_NOTHING_{self.instance}"
+
 
 ALWAYS_TRUE = RuleAlwaysTrue()
 ALWAYS_FALSE = RuleAlwaysFalse()
