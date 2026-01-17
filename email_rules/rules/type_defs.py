@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from enum import Enum, auto
 from typing import Callable
 
 from pydantic import BaseModel
@@ -60,6 +61,24 @@ class AggregatedRuleFilter(RuleFilter):
         )
 
 
+class RuleActionApplicationException(Exception):
+    pass
+
+
+class RuleActionStopProcessingCurrentFileException(Exception):
+    pass
+
+
+class RuleActionStopProcessingAllFilesException(Exception):
+    pass
+
+
+class RuleActionApplicationState(Enum):
+    CONTINUE = auto()
+    STOP_PROCESSING_CURRENT_FILE = auto()
+    STOP_PROCESSING_ALL_FILES = auto()
+
+
 class RuleAction(BaseModel, ABC):
     @abstractmethod
     def apply(self, email_state: EmailState) -> EmailState:
@@ -70,11 +89,33 @@ class Rule(BaseModel):
     filter_expr: RuleFilter
     actions: list[RuleAction]
 
-    def apply_rule_to_email(self, email: Email, email_state: EmailState) -> EmailState:
+    def apply_rule_to_email(
+        self, email: Email, email_state: EmailState
+    ) -> tuple[EmailState, RuleActionApplicationState]:
+        rule_application_state = RuleActionApplicationState.CONTINUE
         if not self.filter_expr.evaluate(email):
-            return email_state
+            return email_state, rule_application_state
 
         for action in self.actions:
-            email_state = action.apply(email_state)
+            if rule_application_state != RuleActionApplicationState.CONTINUE:
+                break
+            try:
+                email_state = action.apply(email_state)
+            except RuleActionStopProcessingCurrentFileException:
+                rule_application_state = RuleActionApplicationState.STOP_PROCESSING_CURRENT_FILE
+            except RuleActionStopProcessingAllFilesException:
+                rule_application_state = RuleActionApplicationState.STOP_PROCESSING_ALL_FILES
 
-        return email_state
+        return email_state, rule_application_state
+
+    @staticmethod
+    def apply_rules_to_email(email: Email, rules: list["Rule"]) -> tuple[EmailState, RuleActionApplicationState]:
+        email_state = EmailState.create_initial_state()
+        rule_application_state = RuleActionApplicationState.CONTINUE
+
+        for rule in rules:
+            if rule_application_state != RuleActionApplicationState.CONTINUE:
+                break
+            email_state, rule_application_state = rule.apply_rule_to_email(email, email_state)
+
+        return email_state, rule_application_state

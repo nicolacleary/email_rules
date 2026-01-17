@@ -1,5 +1,9 @@
 from email_rules.core.type_defs import EmailFolder, EmailState, EmailTag
-from email_rules.rules.type_defs import RuleAction
+from email_rules.rules.type_defs import (
+    RuleAction,
+    RuleActionStopProcessingAllFilesException,
+    RuleActionStopProcessingCurrentFileException,
+)
 
 
 class RuleActionAddTag(RuleAction):
@@ -16,3 +20,13 @@ class RuleActionMoveToFolder(RuleAction):
     def apply(self, email_state: EmailState) -> EmailState:
         email_state.current_folder = self.folder
         return email_state
+
+
+class RuleActionStopProcessingCurrentFile(RuleAction):
+    def apply(self, email_state: EmailState) -> EmailState:
+        raise RuleActionStopProcessingCurrentFileException()
+
+
+class RuleActionStopProcessingAllFiles(RuleAction):
+    def apply(self, email_state: EmailState) -> EmailState:
+        raise RuleActionStopProcessingAllFilesException()

@@ -1,4 +1,9 @@
-from email_rules.rules.basic_actions import RuleActionAddTag, RuleActionMoveToFolder
+from email_rules.rules.basic_actions import (
+    RuleActionAddTag,
+    RuleActionMoveToFolder,
+    RuleActionStopProcessingAllFiles,
+    RuleActionStopProcessingCurrentFile,
+)
 from email_rules.rules.basic_filters import RuleSubjectEq, RuleToEq
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter, AggregatedRuleFilter, NegatedRuleFilter
 from email_rules.exporting.templates import Templates
@@ -18,6 +23,10 @@ def render_rule_action(rule_action: RuleAction) -> RenderedRuleAction:
                 folder=rule_action.folder,
             ).render()
         )
+    if type(rule_action) is RuleActionStopProcessingAllFiles:
+        return RenderedRuleAction("stop;")
+    if type(rule_action) is RuleActionStopProcessingCurrentFile:
+        return RenderedRuleAction("return;")
 
     raise ValueError(f"Unsupported type: {type(rule_action)}")
 
