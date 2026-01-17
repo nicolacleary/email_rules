@@ -113,14 +113,15 @@ def test_to_camel_case(text: str, expected: str) -> None:
         ),
         pytest.param(
             Templates.EMAIL_RULE(
+                comment="Some comment",
                 condition=RenderedRuleFilter('header :is "subject" "important"'),
                 actions=[
                     RenderedRuleAction('fileinto "tag-1";'),
                     RenderedRuleAction('fileinto "tag-2";'),
                 ],
             ),
-            TEST_DATA_TEMPLATES_DIR / "rule_with_two_tags.txt",
-            id="rule_with_two_tags",
+            TEST_DATA_TEMPLATES_DIR / "rule_with_two_tags_and_comment.txt",
+            id="rule_with_two_tags_and_comment",
         ),
         pytest.param(
             Templates.PROTON_EMAIL_RULES_FILE(

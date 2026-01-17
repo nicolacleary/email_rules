@@ -88,6 +88,7 @@ class RuleAction(BaseModel, ABC):
 class Rule(BaseModel):
     filter_expr: RuleFilter
     actions: list[RuleAction]
+    comment: str | None = None
 
     def apply_rule_to_email(
         self, email: Email, email_state: EmailState

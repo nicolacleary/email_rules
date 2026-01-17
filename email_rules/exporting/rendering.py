@@ -84,6 +84,7 @@ def render_rule_filter(rule_filter: RuleFilter) -> RenderedRuleFilter:
 def render_rule(rule: Rule) -> RenderedRule:
     return RenderedRule(
         Templates.EMAIL_RULE(
+            comment=rule.comment,
             condition=render_rule_filter(rule.filter_expr),
             actions=[render_rule_action(action) for action in rule.actions],
         ).render()

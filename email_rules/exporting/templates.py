@@ -41,6 +41,7 @@ class FilterCombineOr(_JinjaTemplate):
 
 
 class EmailRule(_JinjaTemplate):
+    comment: str | None
     condition: RenderedRuleFilter
     actions: list[RenderedRuleAction]
 
