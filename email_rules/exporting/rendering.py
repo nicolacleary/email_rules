@@ -9,10 +9,12 @@ from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter, Aggregated
 from email_rules.exporting.templates import Templates
 from email_rules.exporting.type_defs import (
     FilterCombineOperation,
+    RenderedExtensions,
     RenderedRule,
     RenderedRuleAction,
     RenderedRuleFilter,
     SieveComparisonOperator,
+    SieveExtension,
     SieveSection,
 )
 
@@ -36,6 +38,21 @@ def render_rule_action(rule_action: RuleAction) -> RenderedRuleAction:
         return RenderedRuleAction("return;")
 
     raise ValueError(f"Unsupported type: {type(rule_action)}")
+
+
+def render_extensions(dependencies: list[SieveExtension]) -> RenderedExtensions | None:
+    # Enforce unique and in alphabetical order
+    # TODO: check later to see if import order is important
+    dependencies = sorted(list(set(dependencies)))
+
+    if len(dependencies) == 0:
+        return None
+    if len(dependencies) == 1:
+        return RenderedExtensions(f'require "{dependencies[0]}";')
+
+    deps_as_str = ", ".join([f'"{dep.value}"' for dep in dependencies])
+
+    return RenderedExtensions(f"require [{deps_as_str}];")
 
 
 def render_rule_filter(rule_filter: RuleFilter) -> RenderedRuleFilter:
@@ -123,4 +140,18 @@ def render_rule(rule: Rule) -> RenderedRule:
 
 
 def render_proton_email_rules_file(rules: list[Rule]) -> str:
-    return Templates.PROTON_EMAIL_RULES_FILE(rendered_rules=[render_rule(rule) for rule in rules]).render()
+    DEFAULT_EXTENSIONS = [
+        SieveExtension.FILEINTO,
+        SieveExtension.INCLUDE,
+        SieveExtension.ENVIRONMENT,
+        SieveExtension.VARIABLES,
+        SieveExtension.RELATIONAL,
+        SieveExtension.COMPARATOR_ASCII_NUMERIC,
+        SieveExtension.SPAMTEST,
+    ]
+    rendered_extensions = render_extensions(DEFAULT_EXTENSIONS)
+
+    return Templates.PROTON_EMAIL_RULES_FILE(
+        extensions=rendered_extensions,
+        rendered_rules=[render_rule(rule) for rule in rules],
+    ).render()

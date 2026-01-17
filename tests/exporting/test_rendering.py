@@ -6,7 +6,8 @@ from email_rules.core.type_defs import EmailAddress, EmailFrom, EmailSubject, Em
 from email_rules.rules.basic_actions import RuleActionAddTag
 from email_rules.rules.basic_filters import RuleFromEq, RuleSubjectContains, RuleSubjectEq, RuleToEq
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter
-from email_rules.exporting.rendering import render_rule, render_rule_action, render_rule_filter
+from email_rules.exporting.rendering import render_extensions, render_rule, render_rule_action, render_rule_filter
+from email_rules.exporting.type_defs import SieveExtension
 
 from tests.exporting.common import TEST_DATA_TEMPLATES_DIR
 
@@ -99,3 +100,36 @@ def test_render_rule_filter(rule: RuleFilter, expected_output: Path) -> None:
 )
 def test_render_rule(rule: Rule, expected_output: Path) -> None:
     assert render_rule(rule) == expected_output.read_text()
+
+
+@pytest.mark.parametrize(
+    "dependencies, expected",
+    [
+        pytest.param(
+            [],
+            None,
+            id="no_dependencies",
+        ),
+        pytest.param(
+            [SieveExtension.ENVIRONMENT],
+            'require "environment";',
+            id="one_dependency",
+        ),
+        pytest.param(
+            [SieveExtension.ENVIRONMENT, SieveExtension.ENVIRONMENT],
+            'require "environment";',
+            id="duplicate_extension",
+        ),
+        pytest.param(
+            [
+                SieveExtension.FILEINTO,
+                SieveExtension.ENVIRONMENT,
+                SieveExtension.VARIABLES,
+            ],
+            'require ["environment", "fileinto", "variables"];',
+            id="three_extensions",
+        ),
+    ],
+)
+def test_render_extensions(dependencies: list[SieveExtension], expected: str | None) -> None:
+    assert render_extensions(dependencies) == expected

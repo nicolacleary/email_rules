@@ -7,6 +7,7 @@ from email_rules.exporting._templates import _JinjaTemplate, _to_camel_case
 from email_rules.exporting.templates import Templates
 from email_rules.exporting.type_defs import (
     FilterCombineOperation,
+    RenderedExtensions,
     RenderedRule,
     RenderedRuleAction,
     RenderedRuleFilter,
@@ -125,13 +126,27 @@ def test_to_camel_case(text: str, expected: str) -> None:
         ),
         pytest.param(
             Templates.PROTON_EMAIL_RULES_FILE(
+                extensions=RenderedExtensions(
+                    'require ["fileinto", "include", "environment", "variables", "relational", "comparator-i;ascii-numeric", "spamtest"];'  # noqa: E501
+                ),
                 rendered_rules=[
                     RenderedRule("some rule 1;"),
                     RenderedRule("some rule 2;"),
-                ]
+                ],
             ),
             TEST_DATA_TEMPLATES_DIR / "proton_email_rules_file.txt",
             id="proton_email_rules_file",
+        ),
+        pytest.param(
+            Templates.PROTON_EMAIL_RULES_FILE(
+                extensions=None,
+                rendered_rules=[
+                    RenderedRule("some rule 1;"),
+                    RenderedRule("some rule 2;"),
+                ],
+            ),
+            TEST_DATA_TEMPLATES_DIR / "proton_email_rules_file_no_extensions.txt",
+            id="proton_email_rules_file_no_extensions",
         ),
     ],
 )

@@ -2,6 +2,7 @@ from enum import StrEnum
 from typing import NewType
 
 
+RenderedExtensions = NewType("RenderedExtensions", str)
 RenderedRule = NewType("RenderedRule", str)
 RenderedRuleAction = NewType("RenderedRuleAction", str)
 RenderedRuleFilter = NewType("RenderedRuleFilter", str)
@@ -15,6 +16,16 @@ class FilterCombineOperation(StrEnum):
 class SieveComparisonOperator(StrEnum):
     EQ = "is"
     CONTAINS = "contains"
+
+
+class SieveExtension(StrEnum):
+    FILEINTO = "fileinto"
+    INCLUDE = "include"
+    ENVIRONMENT = "environment"
+    VARIABLES = "variables"
+    RELATIONAL = "relational"
+    SPAMTEST = "spamtest"
+    COMPARATOR_ASCII_NUMERIC = "comparator-i;ascii-numeric"
 
 
 class SieveSectionName(StrEnum):
