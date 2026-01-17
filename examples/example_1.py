@@ -1,13 +1,15 @@
 from pathlib import Path, PurePosixPath
 
 from email_rules.core import Email, EmailAddress, EmailFolder, EmailFrom, EmailTag, EmailSubject
-from email_rules.rules.type_defs import Rule, RuleFilter
-from email_rules.rules.basic_actions import (
+from email_rules.rules import (
+    Rule,
+    RuleFilter,
     RuleActionAddTag,
     RuleActionMoveToFolder,
     RuleActionStopProcessingCurrentFile,
+    RuleFromEq,
+    RuleSubjectContains,
 )
-from email_rules.rules.basic_filters import RuleFromEq, RuleSubjectContains
 from email_rules.exporting import RenderedRuleFilter, SieveExtension, SieveRenderer
 from email_rules.simulation_framework.type_defs import RuleFile
 from email_rules.simulation_framework.rule_simulation import IterableClass

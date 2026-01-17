@@ -4,8 +4,9 @@ from typing import Generic, Iterable, Self, TypeVar, cast
 from pydantic import BaseModel, model_validator
 
 from email_rules.core import Email, EmailFolder, EmailState, EmailTag
-from email_rules.rules.type_defs import Rule, RuleAction
-from email_rules.rules.basic_actions import (
+from email_rules.rules import (
+    Rule,
+    RuleAction,
     RuleActionAddTag,
     RuleActionMoveToFolder,
     RuleActionStopProcessingCurrentFile,

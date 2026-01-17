@@ -3,8 +3,13 @@ from typing import Sequence
 import pytest
 
 from email_rules.core import Email, EmailState
-from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter
-from email_rules.rules.basic_actions import RuleActionStopProcessingAllFiles, RuleActionStopProcessingCurrentFile
+from email_rules.rules import (
+    Rule,
+    RuleAction,
+    RuleFilter,
+    RuleActionStopProcessingAllFiles,
+    RuleActionStopProcessingCurrentFile,
+)
 from email_rules.simulation_framework.type_defs import (
     RuleApplicationInterruptState,
     RuleApplicationState,

@@ -4,7 +4,7 @@ from typing import Self
 from pydantic import BaseModel
 
 from email_rules.core import EmailState
-from email_rules.rules.type_defs import Rule
+from email_rules.rules import Rule
 
 
 class RuleApplicationInterruptState(Enum):

@@ -1,7 +1,7 @@
 from pathlib import PurePosixPath
 
 from email_rules.core import EmailFolder, EmailState, EmailTag
-from email_rules.rules.basic_actions import RuleActionAddTag, RuleActionMoveToFolder, RuleActionMarkAsRead
+from email_rules.rules import RuleActionAddTag, RuleActionMoveToFolder, RuleActionMarkAsRead
 
 
 def test_rule_action_add_tag() -> None:
