@@ -7,6 +7,11 @@ RenderedRuleAction = NewType("RenderedRuleAction", str)
 RenderedRuleFilter = NewType("RenderedRuleFilter", str)
 
 
+class FilterCombineOperation(StrEnum):
+    AND = "allof"
+    OR = "anyof"
+
+
 class SieveComparisonOperator(StrEnum):
     EQ = "is"
     CONTAINS = "contains"

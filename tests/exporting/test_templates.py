@@ -6,6 +6,7 @@ from email_rules.core.type_defs import EmailAddress, EmailFolder, EmailFrom, Ema
 from email_rules.exporting._templates import _JinjaTemplate, _to_camel_case
 from email_rules.exporting.templates import Templates
 from email_rules.exporting.type_defs import (
+    FilterCombineOperation,
     RenderedRule,
     RenderedRuleAction,
     RenderedRuleFilter,
@@ -70,12 +71,27 @@ def test_to_camel_case(text: str, expected: str) -> None:
             id="filter_from_eq_case_sensitive",
         ),
         pytest.param(
-            Templates.FILTER_COMBINE_AND(
-                expr_1=RenderedRuleFilter("abc"),
-                expr_2=RenderedRuleFilter("def"),
+            Templates.FILTER_COMBINE_AND_OR(
+                exprs=[
+                    RenderedRuleFilter("abc"),
+                    RenderedRuleFilter("def"),
+                ],
+                operation=FilterCombineOperation.AND,
             ),
             TEST_DATA_TEMPLATES_DIR / "filter_combine_and.txt",
             id="filter_combine_and",
+        ),
+        pytest.param(
+            Templates.FILTER_COMBINE_AND_OR(
+                exprs=[
+                    RenderedRuleFilter("abc"),
+                    RenderedRuleFilter("def"),
+                    RenderedRuleFilter("ghi"),
+                ],
+                operation=FilterCombineOperation.AND,
+            ),
+            TEST_DATA_TEMPLATES_DIR / "filter_combine_and_three_arguments.txt",
+            id="filter_combine_and_three_arguments",
         ),
         pytest.param(
             Templates.FILTER_COMBINE_NOT(
@@ -85,9 +101,12 @@ def test_to_camel_case(text: str, expected: str) -> None:
             id="filter_combine_not",
         ),
         pytest.param(
-            Templates.FILTER_COMBINE_OR(
-                expr_1=RenderedRuleFilter("abc"),
-                expr_2=RenderedRuleFilter("def"),
+            Templates.FILTER_COMBINE_AND_OR(
+                exprs=[
+                    RenderedRuleFilter("abc"),
+                    RenderedRuleFilter("def"),
+                ],
+                operation=FilterCombineOperation.OR,
             ),
             TEST_DATA_TEMPLATES_DIR / "filter_combine_or.txt",
             id="filter_combine_or",

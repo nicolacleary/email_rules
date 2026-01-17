@@ -8,6 +8,7 @@ from email_rules.rules.basic_filters import RuleFromEq, RuleSubjectContains, Rul
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter, AggregatedRuleFilter, NegatedRuleFilter
 from email_rules.exporting.templates import Templates
 from email_rules.exporting.type_defs import (
+    FilterCombineOperation,
     RenderedRule,
     RenderedRuleAction,
     RenderedRuleFilter,
@@ -40,16 +41,22 @@ def render_rule_action(rule_action: RuleAction) -> RenderedRuleAction:
 def render_rule_filter(rule_filter: RuleFilter) -> RenderedRuleFilter:
     if type(rule_filter) is AggregatedRuleFilter and rule_filter.is_operator_and():
         return RenderedRuleFilter(
-            Templates.FILTER_COMBINE_AND(
-                expr_1=render_rule_filter(rule_filter.arg_1),
-                expr_2=render_rule_filter(rule_filter.arg_2),
+            Templates.FILTER_COMBINE_AND_OR(
+                exprs=[
+                    render_rule_filter(rule_filter.arg_1),
+                    render_rule_filter(rule_filter.arg_2),
+                ],
+                operation=FilterCombineOperation.AND,
             ).render()
         )
     elif type(rule_filter) is AggregatedRuleFilter:
         return RenderedRuleFilter(
-            Templates.FILTER_COMBINE_OR(
-                expr_1=render_rule_filter(rule_filter.arg_1),
-                expr_2=render_rule_filter(rule_filter.arg_2),
+            Templates.FILTER_COMBINE_AND_OR(
+                exprs=[
+                    render_rule_filter(rule_filter.arg_1),
+                    render_rule_filter(rule_filter.arg_2),
+                ],
+                operation=FilterCombineOperation.OR,
             ).render()
         )
 

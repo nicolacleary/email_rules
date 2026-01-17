@@ -1,6 +1,11 @@
+from typing import Self
+
+from pydantic import model_validator
+
 from email_rules.core.type_defs import EmailFolder, EmailTag
 from email_rules.exporting._templates import _JinjaTemplate
 from email_rules.exporting.type_defs import (
+    FilterCombineOperation,
     RenderedRule,
     RenderedRuleAction,
     RenderedRuleFilter,
@@ -26,18 +31,19 @@ class FilterGeneric(_JinjaTemplate):
     section_part: SieveSectionPart
 
 
-class FilterCombineAnd(_JinjaTemplate):
-    expr_1: RenderedRuleFilter
-    expr_2: RenderedRuleFilter
+class FilterCombineAndOr(_JinjaTemplate):
+    operation: FilterCombineOperation
+    exprs: list[RenderedRuleFilter]
+
+    @model_validator(mode="after")
+    def validate_num_expressions(self) -> Self:
+        if len(self.exprs) < 2:
+            raise ValueError(f"Number of expressions should be at least 2, got: {self.exprs}")
+        return self
 
 
 class FilterCombineNot(_JinjaTemplate):
     expr_1: RenderedRuleFilter
-
-
-class FilterCombineOr(_JinjaTemplate):
-    expr_1: RenderedRuleFilter
-    expr_2: RenderedRuleFilter
 
 
 class EmailRule(_JinjaTemplate):
@@ -53,9 +59,8 @@ class ProtonEmailRulesFile(_JinjaTemplate):
 class Templates:
     ACTION_MOVE_TO_FOLDER = ActionMoveToFolder
     ACTION_TAG = ActionTag
-    FILTER_COMBINE_AND = FilterCombineAnd
+    FILTER_COMBINE_AND_OR = FilterCombineAndOr
     FILTER_COMBINE_NOT = FilterCombineNot
-    FILTER_COMBINE_OR = FilterCombineOr
     FILTER_GENERIC = FilterGeneric
     EMAIL_RULE = EmailRule
     PROTON_EMAIL_RULES_FILE = ProtonEmailRulesFile
