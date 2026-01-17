@@ -1,1 +1,1 @@
-header :matches "subject" "some text"
+header :is "subject" "some text"

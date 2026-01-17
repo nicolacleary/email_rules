@@ -1,1 +1,1 @@
-header :matches :comparator "i;octet" "subject" "Some Text"
+header :is :comparator "i;octet" "subject" "Some Text"

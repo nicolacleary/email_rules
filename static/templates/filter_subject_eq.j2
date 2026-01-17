@@ -1,1 +1,1 @@
-header :matches {% if case_sensitive -%} :comparator "i;octet" "subject" "{{ text }}" {%- else -%} "subject" "{{ text | lower }}" {%- endif -%}
+header :is {% if case_sensitive -%} :comparator "i;octet" "subject" "{{ text }}" {%- else -%} "subject" "{{ text | lower }}" {%- endif -%}
