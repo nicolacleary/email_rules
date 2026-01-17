@@ -1,4 +1,4 @@
-from email_rules.rules.basic_actions import RuleActionAddTag
+from email_rules.rules.basic_actions import RuleActionAddTag, RuleActionMoveToFolder
 from email_rules.rules.basic_filters import RuleSubjectEq, RuleToEq
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter, AggregatedRuleFilter, NegatedRuleFilter
 from email_rules.exporting.templates import Templates
@@ -10,6 +10,12 @@ def render_rule_action(rule_action: RuleAction) -> RenderedRuleAction:
         return RenderedRuleAction(
             Templates.ACTION_TAG(
                 tag_name=rule_action.tag_to_apply,
+            ).render()
+        )
+    if type(rule_action) is RuleActionMoveToFolder:
+        return RenderedRuleAction(
+            Templates.ACTION_MOVE_TO_FOLDER(
+                folder=rule_action.folder,
             ).render()
         )
 

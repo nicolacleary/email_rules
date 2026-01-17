@@ -1,6 +1,10 @@
-from email_rules.core.type_defs import EmailSubject, EmailTag, EmailTo
+from email_rules.core.type_defs import EmailFolder, EmailSubject, EmailTag, EmailTo
 from email_rules.exporting._templates import _JinjaTemplate
 from email_rules.exporting.type_defs import RenderedRule, RenderedRuleAction, RenderedRuleFilter
+
+
+class ActionMoveToFolder(_JinjaTemplate):
+    folder: EmailFolder
 
 
 class ActionTag(_JinjaTemplate):
@@ -41,6 +45,7 @@ class ProtonEmailRulesFile(_JinjaTemplate):
 
 
 class Templates:
+    ACTION_MOVE_TO_FOLDER = ActionMoveToFolder
     ACTION_TAG = ActionTag
     FILTER_COMBINE_AND = FilterCombineAnd
     FILTER_COMBINE_NOT = FilterCombineNot

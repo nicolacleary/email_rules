@@ -1,5 +1,7 @@
-from email_rules.core.type_defs import EmailState, EmailTag
-from email_rules.rules.basic_actions import RuleActionAddTag
+from pathlib import PurePosixPath
+
+from email_rules.core.type_defs import EmailFolder, EmailState, EmailTag
+from email_rules.rules.basic_actions import RuleActionAddTag, RuleActionMoveToFolder
 
 
 def test_rule_action_add_tag() -> None:
@@ -10,3 +12,11 @@ def test_rule_action_add_tag() -> None:
     assert rule_action.apply(EmailState.create_initial_state()).tags == {
         EmailTag(text),
     }
+
+
+def test_rule_action_move_to_folder() -> None:
+    folder_path = PurePosixPath("abc/def")
+    rule_action = RuleActionMoveToFolder(
+        folder=EmailFolder(folder_path),
+    )
+    assert rule_action.apply(EmailState.create_initial_state()).current_folder == EmailFolder(folder_path)

@@ -1,8 +1,8 @@
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import pytest
 
-from email_rules.core.type_defs import EmailAddress, EmailSubject, EmailTag, EmailTo
+from email_rules.core.type_defs import EmailAddress, EmailFolder, EmailSubject, EmailTag, EmailTo
 from email_rules.exporting._templates import _JinjaTemplate, _to_camel_case
 from email_rules.exporting.templates import Templates
 from email_rules.exporting.type_defs import RenderedRule, RenderedRuleAction, RenderedRuleFilter
@@ -26,6 +26,13 @@ def test_to_camel_case(text: str, expected: str) -> None:
 @pytest.mark.parametrize(
     "template, expected_output",
     [
+        pytest.param(
+            Templates.ACTION_MOVE_TO_FOLDER(
+                folder=EmailFolder(PurePosixPath("some/folder")),
+            ),
+            TEST_DATA_TEMPLATES_DIR / "action_move_to_folder.txt",
+            id="action_move_to_folder",
+        ),
         pytest.param(
             Templates.ACTION_TAG(
                 tag_name=EmailTag("hi"),
