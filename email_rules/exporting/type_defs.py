@@ -1,7 +1,6 @@
 from enum import StrEnum
 from typing import NewType
 
-
 RenderedExtensions = NewType("RenderedExtensions", str)
 RenderedRule = NewType("RenderedRule", str)
 RenderedRuleAction = NewType("RenderedRuleAction", str)

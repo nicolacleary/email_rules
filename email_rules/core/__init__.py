@@ -1,4 +1,5 @@
 from email_rules.core.type_defs import (
+    INBOX,
     Email,
     EmailAddress,
     EmailFolder,
@@ -7,9 +8,7 @@ from email_rules.core.type_defs import (
     EmailSubject,
     EmailTag,
     EmailTo,
-    INBOX,
 )
-
 
 __all__ = (
     "Email",

@@ -3,7 +3,6 @@ from typing import NewType, Self
 
 from pydantic import BaseModel
 
-
 EmailSubject = NewType("EmailSubject", str)
 EmailAddress = NewType("EmailAddress", str)
 EmailFrom = NewType("EmailFrom", EmailAddress)

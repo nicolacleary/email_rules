@@ -6,23 +6,25 @@ from email_rules.core import Email, EmailState
 from email_rules.rules import (
     Rule,
     RuleAction,
-    RuleFilter,
     RuleActionStopProcessingAllFiles,
     RuleActionStopProcessingCurrentFile,
+    RuleFilter,
 )
 from email_rules.simulation_framework import (
     RuleApplicationInterruptState,
     RuleApplicationState,
     RuleFile,
     RuleFileApplicationState,
+    apply_rule_files_to_email_iteratively,
     apply_rules_to_email,
     apply_rules_to_email_iteratively,
-    apply_rule_files_to_email_iteratively,
     display_rule_file_application_states,
 )
-
-from tests.rules.common import ALWAYS_FALSE, ALWAYS_TRUE, RuleActionDoNothingAndTrackCalls
-
+from tests.rules.common import (
+    ALWAYS_FALSE,
+    ALWAYS_TRUE,
+    RuleActionDoNothingAndTrackCalls,
+)
 
 RuleInfo = tuple[list[int], RuleFilter]
 

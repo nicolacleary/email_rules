@@ -3,8 +3,8 @@ from typing import Iterable, Sequence
 from email_rules.core import Email, EmailState
 from email_rules.rules import (
     Rule,
-    RuleActionStopProcessingCurrentFileException,
     RuleActionStopProcessingAllFilesException,
+    RuleActionStopProcessingCurrentFileException,
 )
 from email_rules.simulation_framework.type_defs import (
     RuleApplicationInterruptState,

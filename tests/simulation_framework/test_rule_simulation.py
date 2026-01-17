@@ -6,14 +6,18 @@ from pydantic import ValidationError
 from email_rules.core import Email, EmailFolder, EmailTag
 from email_rules.rules import (
     Rule,
-    RuleFilter,
     RuleActionAddTag,
-    RuleActionMoveToFolder,
-    RuleActionStopProcessingCurrentFile,
-    RuleActionStopProcessingAllFiles,
     RuleActionMarkAsRead,
+    RuleActionMoveToFolder,
+    RuleActionStopProcessingAllFiles,
+    RuleActionStopProcessingCurrentFile,
+    RuleFilter,
 )
-from email_rules.simulation_framework import EmailRuleSimulation, IterableClass, RuleFile
+from email_rules.simulation_framework import (
+    EmailRuleSimulation,
+    IterableClass,
+    RuleFile,
+)
 
 
 # TODO: consolidate with other definition

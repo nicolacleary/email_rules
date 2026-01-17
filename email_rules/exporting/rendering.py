@@ -1,23 +1,6 @@
 from itertools import chain
 from pathlib import Path
 
-from email_rules.rules import (
-    RuleFromEq,
-    RuleSubjectContains,
-    RuleSubjectEq,
-    RuleToEq,
-    Rule,
-    RuleAction,
-    RuleFilter,
-    AggregatedRuleFilter,
-    NegatedRuleFilter,
-    RuleActionAddTag,
-    RuleActionMarkAsRead,
-    RuleActionMoveToFolder,
-    RuleActionStopProcessingAllFiles,
-    RuleActionStopProcessingCurrentFile,
-)
-from email_rules.rules._base_filters import GenericRuleTextEq, GenericRuleTextContains, GenericRuleTextListContains
 from email_rules.exporting.templates import Templates
 from email_rules.exporting.type_defs import (
     FilterCombineOperation,
@@ -28,6 +11,27 @@ from email_rules.exporting.type_defs import (
     SieveComparisonOperator,
     SieveExtension,
     SieveSection,
+)
+from email_rules.rules import (
+    AggregatedRuleFilter,
+    NegatedRuleFilter,
+    Rule,
+    RuleAction,
+    RuleActionAddTag,
+    RuleActionMarkAsRead,
+    RuleActionMoveToFolder,
+    RuleActionStopProcessingAllFiles,
+    RuleActionStopProcessingCurrentFile,
+    RuleFilter,
+    RuleFromEq,
+    RuleSubjectContains,
+    RuleSubjectEq,
+    RuleToEq,
+)
+from email_rules.rules._base_filters import (
+    GenericRuleTextContains,
+    GenericRuleTextEq,
+    GenericRuleTextListContains,
 )
 
 

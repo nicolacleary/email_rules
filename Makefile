@@ -8,5 +8,6 @@ test:
 format_and_lint:
 	.venv/bin/ruff format .
 	.venv/bin/ruff check . --fix
+	.venv/bin/isort .
 	.venv/bin/flake8 .
 	.venv/bin/mypy .

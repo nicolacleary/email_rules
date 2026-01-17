@@ -2,8 +2,8 @@ from email_rules.rules.basic_actions import (
     RuleActionAddTag,
     RuleActionMarkAsRead,
     RuleActionMoveToFolder,
-    RuleActionStopProcessingCurrentFile,
     RuleActionStopProcessingAllFiles,
+    RuleActionStopProcessingCurrentFile,
 )
 from email_rules.rules.basic_filters import (
     RuleFromEq,
@@ -21,7 +21,6 @@ from email_rules.rules.type_defs import (
     RuleActionStopProcessingCurrentFileException,
     RuleFilter,
 )
-
 
 __all__ = (
     # basic_actions.py

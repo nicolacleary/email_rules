@@ -5,7 +5,6 @@ from typing import Any
 from jinja2 import Environment, FileSystemLoader, Template
 from pydantic import BaseModel
 
-
 _TEMPLATE_DIR = Path(__file__).parent.parent.parent / "static/templates"
 assert _TEMPLATE_DIR.exists(), f"Could not find {_TEMPLATE_DIR}"
 

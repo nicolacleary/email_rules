@@ -8,17 +8,16 @@ from email_rules.rules import (
     Rule,
     RuleAction,
     RuleActionAddTag,
-    RuleActionMoveToFolder,
-    RuleActionStopProcessingCurrentFile,
-    RuleActionStopProcessingAllFiles,
     RuleActionMarkAsRead,
+    RuleActionMoveToFolder,
+    RuleActionStopProcessingAllFiles,
+    RuleActionStopProcessingCurrentFile,
 )
-from email_rules.simulation_framework.type_defs import RuleFile
 from email_rules.simulation_framework.rule_application import (
     apply_rule_files_to_email_iteratively,
     display_rule_file_application_states,
 )
-
+from email_rules.simulation_framework.type_defs import RuleFile
 
 T = TypeVar("T")
 
