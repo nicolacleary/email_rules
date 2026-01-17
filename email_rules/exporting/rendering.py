@@ -1,4 +1,5 @@
 from itertools import chain
+from pathlib import Path
 
 from email_rules.rules.basic_actions import (
     RuleActionAddTag,
@@ -188,10 +189,15 @@ class SieveRenderer:
             extensions.append(SieveExtension.INCLUDE)
         return extensions
 
-    def render_proton_email_rules_file(self, rules: list[Rule]) -> str:
+    def render_proton_email_rules_file_content(self, rules: list[Rule]) -> str:
         extensions = self.get_extension_requirements(rules)
 
         return Templates.PROTON_EMAIL_RULES_FILE(
             extensions=self.render_extensions(extensions),
             rendered_rules=[self.render_rule(rule) for rule in rules],
         ).render()
+
+    def render_proton_email_rules_file(self, rules: list[Rule], file_path: Path) -> None:
+        file_content = self.render_proton_email_rules_file_content(rules)
+        with file_path.open("w") as f:
+            f.write(file_content)
