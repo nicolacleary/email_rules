@@ -1,5 +1,11 @@
-from email_rules.core.type_defs import Email, EmailSubject, EmailTo
+from email_rules.core.type_defs import Email, EmailFrom, EmailSubject, EmailTo
 from email_rules.rules._base_filters import GenericRuleTextContains, GenericRuleTextEq, GenericRuleTextListContains
+
+
+class RuleFromEq(GenericRuleTextEq[EmailFrom]):
+    @staticmethod
+    def get_text_from_email(email: Email) -> EmailFrom:
+        return email.email_from
 
 
 class RuleSubjectContains(GenericRuleTextContains[EmailSubject]):

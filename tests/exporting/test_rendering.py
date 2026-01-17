@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from email_rules.core.type_defs import EmailAddress, EmailSubject, EmailTag, EmailTo
+from email_rules.core.type_defs import EmailAddress, EmailFrom, EmailSubject, EmailTag, EmailTo
 from email_rules.rules.basic_actions import RuleActionAddTag
-from email_rules.rules.basic_filters import RuleSubjectEq, RuleToEq
+from email_rules.rules.basic_filters import RuleFromEq, RuleSubjectEq, RuleToEq
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter
 from email_rules.exporting.rendering import render_rule, render_rule_action, render_rule_filter
 
@@ -39,6 +39,11 @@ def test_render_rule_action(action: RuleAction, expected_output: Path) -> None:
             ),
             TEST_DATA_TEMPLATES_DIR / "rule_filter_combinations_1.txt",
             id="rule_filter_combinations_1",
+        ),
+        pytest.param(
+            (RuleFromEq(text=EmailFrom(EmailAddress("Some Text")), case_sensitive=False)),
+            TEST_DATA_TEMPLATES_DIR / "filter_from_eq_case_insensitive.txt",
+            id="filter_from_eq_case_insensitive",
         ),
     ],
 )

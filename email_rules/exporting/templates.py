@@ -1,6 +1,13 @@
 from email_rules.core.type_defs import EmailFolder, EmailSubject, EmailTag, EmailTo
 from email_rules.exporting._templates import _JinjaTemplate
-from email_rules.exporting.type_defs import RenderedRule, RenderedRuleAction, RenderedRuleFilter
+from email_rules.exporting.type_defs import (
+    RenderedRule,
+    RenderedRuleAction,
+    RenderedRuleFilter,
+    SieveComparisonOperator,
+    SieveSectionName,
+    SieveSectionPart,
+)
 
 
 class ActionMoveToFolder(_JinjaTemplate):
@@ -9,6 +16,14 @@ class ActionMoveToFolder(_JinjaTemplate):
 
 class ActionTag(_JinjaTemplate):
     tag_name: EmailTag
+
+
+class FilterGeneric(_JinjaTemplate):
+    text: str
+    case_sensitive: bool
+    operation: SieveComparisonOperator
+    section_name: SieveSectionName
+    section_part: SieveSectionPart
 
 
 class FilterSubjectContains(_JinjaTemplate):
@@ -56,6 +71,7 @@ class Templates:
     FILTER_COMBINE_AND = FilterCombineAnd
     FILTER_COMBINE_NOT = FilterCombineNot
     FILTER_COMBINE_OR = FilterCombineOr
+    FILTER_GENERIC = FilterGeneric
     FILTER_SUBJECT_CONTAINS = FilterSubjectContains
     FILTER_SUBJECT_EQ = FilterSubjectEq
     FILTER_TO_EQ = FilterToEq

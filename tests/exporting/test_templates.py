@@ -2,10 +2,17 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
-from email_rules.core.type_defs import EmailAddress, EmailFolder, EmailSubject, EmailTag, EmailTo
+from email_rules.core.type_defs import EmailAddress, EmailFolder, EmailFrom, EmailSubject, EmailTag, EmailTo
 from email_rules.exporting._templates import _JinjaTemplate, _to_camel_case
 from email_rules.exporting.templates import Templates
-from email_rules.exporting.type_defs import RenderedRule, RenderedRuleAction, RenderedRuleFilter
+from email_rules.exporting.type_defs import (
+    RenderedRule,
+    RenderedRuleAction,
+    RenderedRuleFilter,
+    SieveComparisonOperator,
+    SieveSectionName,
+    SieveSectionPart,
+)
 
 from tests.exporting.common import TEST_DATA_TEMPLATES_DIR
 
@@ -39,6 +46,28 @@ def test_to_camel_case(text: str, expected: str) -> None:
             ),
             TEST_DATA_TEMPLATES_DIR / "action_tag.txt",
             id="action_tag",
+        ),
+        pytest.param(
+            Templates.FILTER_GENERIC(
+                case_sensitive=False,
+                text=EmailFrom(EmailAddress("Some Text")),
+                operation=SieveComparisonOperator.EQ,
+                section_name=SieveSectionName.ADDRESS,
+                section_part=SieveSectionPart.FROM,
+            ),
+            TEST_DATA_TEMPLATES_DIR / "filter_from_eq_case_insensitive.txt",
+            id="filter_from_eq_case_insensitive",
+        ),
+        pytest.param(
+            Templates.FILTER_GENERIC(
+                case_sensitive=True,
+                text=EmailTo(EmailAddress("Some Text")),
+                operation=SieveComparisonOperator.EQ,
+                section_name=SieveSectionName.ADDRESS,
+                section_part=SieveSectionPart.FROM,
+            ),
+            TEST_DATA_TEMPLATES_DIR / "filter_from_eq_case_sensitive.txt",
+            id="filter_from_eq_case_sensitive",
         ),
         pytest.param(
             Templates.FILTER_SUBJECT_CONTAINS(
