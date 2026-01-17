@@ -6,15 +6,15 @@ from pydantic import BaseModel
 from email_rules.core.type_defs import EmailState
 
 
-class RuleActionApplicationState(Enum):
+class RuleApplicationInterruptState(Enum):
     CONTINUE = auto()
     STOP_PROCESSING_CURRENT_FILE = auto()
     STOP_PROCESSING_ALL_FILES = auto()
 
 
-class RuleApplication(BaseModel):
+class RuleApplicationState(BaseModel):
     email_state: EmailState
-    rule_application_state: RuleActionApplicationState
+    rule_application_interrupt_state: RuleApplicationInterruptState
     current_rule: str | None
     current_rule_applied: bool
     current_action: str | None
@@ -23,7 +23,7 @@ class RuleApplication(BaseModel):
     def create_initial_state(cls) -> Self:
         return cls(
             email_state=EmailState.create_initial_state(),
-            rule_application_state=RuleActionApplicationState.CONTINUE,
+            rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
             current_rule=None,
             current_rule_applied=False,
             current_action=None,

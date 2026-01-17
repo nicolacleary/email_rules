@@ -5,7 +5,7 @@ import pytest
 from email_rules.core.type_defs import Email, EmailState
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter
 from email_rules.rules.basic_actions import RuleActionStopProcessingAllFiles, RuleActionStopProcessingCurrentFile
-from email_rules.simulation_framework.type_defs import RuleActionApplicationState, RuleApplication
+from email_rules.simulation_framework.type_defs import RuleApplicationInterruptState, RuleApplicationState
 from email_rules.simulation_framework.rule_application import apply_rules_to_email, apply_rules_to_email_iteratively
 
 from tests.rules.common import ALWAYS_FALSE, ALWAYS_TRUE, RuleActionDoNothingAndTrackCalls
@@ -145,16 +145,16 @@ class TestApply:
     @pytest.mark.parametrize(
         "rule_info, expected_states",
         [
-            pytest.param([], [RuleApplication.create_initial_state()], id="empty"),
+            pytest.param([], [RuleApplicationState.create_initial_state()], id="empty"),
             pytest.param(
                 [
                     ([], ALWAYS_TRUE),
                 ],
                 [
-                    RuleApplication.create_initial_state(),
-                    RuleApplication(
+                    RuleApplicationState.create_initial_state(),
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
                         current_rule="<rule_0 filter_expr=TRUE, actions=[]>",
                         current_rule_applied=True,
                         current_action=None,
@@ -167,17 +167,17 @@ class TestApply:
                     ([1], ALWAYS_TRUE),
                 ],
                 [
-                    RuleApplication.create_initial_state(),
-                    RuleApplication(
+                    RuleApplicationState.create_initial_state(),
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
                         current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_1]>",
                         current_rule_applied=True,
                         current_action="DO_NOTHING_1",
                     ),
-                    RuleApplication(
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
                         current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_1]>",
                         current_rule_applied=True,
                         current_action=None,
@@ -191,38 +191,38 @@ class TestApply:
                     ([2, 1, 0], ALWAYS_FALSE),
                 ],
                 [
-                    RuleApplication.create_initial_state(),
-                    RuleApplication(
+                    RuleApplicationState.create_initial_state(),
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
                         current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0, DO_NOTHING_1, DO_NOTHING_2]>",
                         current_rule_applied=True,
                         current_action="DO_NOTHING_0",
                     ),
-                    RuleApplication(
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
                         current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0, DO_NOTHING_1, DO_NOTHING_2]>",
                         current_rule_applied=True,
                         current_action="DO_NOTHING_1",
                     ),
-                    RuleApplication(
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
                         current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0, DO_NOTHING_1, DO_NOTHING_2]>",
                         current_rule_applied=True,
                         current_action="DO_NOTHING_2",
                     ),
-                    RuleApplication(
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
                         current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0, DO_NOTHING_1, DO_NOTHING_2]>",
                         current_rule_applied=True,
                         current_action=None,
                     ),
-                    RuleApplication(
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
                         current_rule="<rule_1 filter_expr=FALSE, actions=[DO_NOTHING_2, DO_NOTHING_1, DO_NOTHING_0]>",
                         current_rule_applied=False,
                         current_action=None,
@@ -237,38 +237,38 @@ class TestApply:
                     ([2], ALWAYS_TRUE),
                 ],
                 [
-                    RuleApplication.create_initial_state(),
-                    RuleApplication(
+                    RuleApplicationState.create_initial_state(),
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
                         current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0]>",
                         current_rule_applied=True,
                         current_action="DO_NOTHING_0",
                     ),
-                    RuleApplication(
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
                         current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0]>",
                         current_rule_applied=True,
                         current_action=None,
                     ),
-                    RuleApplication(
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.CONTINUE,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
                         current_rule="<rule_1 filter_expr=TRUE, actions=[DO_NOTHING_1, STOP_ALL_FILES, DO_NOTHING_1]>",
                         current_rule_applied=True,
                         current_action="DO_NOTHING_1",
                     ),
-                    RuleApplication(
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.STOP_PROCESSING_ALL_FILES,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.STOP_PROCESSING_ALL_FILES,
                         current_rule="<rule_1 filter_expr=TRUE, actions=[DO_NOTHING_1, STOP_ALL_FILES, DO_NOTHING_1]>",
                         current_rule_applied=True,
                         current_action="STOP_ALL_FILES",
                     ),
-                    RuleApplication(
+                    RuleApplicationState(
                         email_state=EmailState.create_initial_state(),
-                        rule_application_state=RuleActionApplicationState.STOP_PROCESSING_ALL_FILES,
+                        rule_application_interrupt_state=RuleApplicationInterruptState.STOP_PROCESSING_ALL_FILES,
                         current_rule="<rule_1 filter_expr=TRUE, actions=[DO_NOTHING_1, STOP_ALL_FILES, DO_NOTHING_1]>",
                         current_rule_applied=True,
                         current_action=None,
@@ -281,7 +281,7 @@ class TestApply:
     def test_iterative_application(
         self,
         rule_info: list[RuleInfo],
-        expected_states: list[RuleApplication],
+        expected_states: list[RuleApplicationState],
         generic_email: Email,
         do_nothing_actions: list[RuleActionDoNothingAndTrackCalls],
     ) -> None:
