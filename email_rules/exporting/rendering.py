@@ -42,20 +42,14 @@ def render_rule_filter(rule_filter: RuleFilter) -> RenderedRuleFilter:
     if type(rule_filter) is AggregatedRuleFilter and rule_filter.is_operator_and():
         return RenderedRuleFilter(
             Templates.FILTER_COMBINE_AND_OR(
-                exprs=[
-                    render_rule_filter(rule_filter.arg_1),
-                    render_rule_filter(rule_filter.arg_2),
-                ],
+                exprs=[render_rule_filter(arg) for arg in rule_filter.args],
                 operation=FilterCombineOperation.AND,
             ).render()
         )
     elif type(rule_filter) is AggregatedRuleFilter:
         return RenderedRuleFilter(
             Templates.FILTER_COMBINE_AND_OR(
-                exprs=[
-                    render_rule_filter(rule_filter.arg_1),
-                    render_rule_filter(rule_filter.arg_2),
-                ],
+                exprs=[render_rule_filter(arg) for arg in rule_filter.args],
                 operation=FilterCombineOperation.OR,
             ).render()
         )

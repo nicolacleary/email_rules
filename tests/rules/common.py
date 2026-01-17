@@ -8,10 +8,16 @@ class RuleAlwaysTrue(RuleFilter):
     def evaluate(self, email: Email) -> bool:
         return True
 
+    def __repr__(self) -> str:
+        return "TRUE"
+
 
 class RuleAlwaysFalse(RuleFilter):
     def evaluate(self, email: Email) -> bool:
         return False
+
+    def __repr__(self) -> str:
+        return "FALSE"
 
 
 class RuleActionDoNothingAndTrackCalls(RuleAction):
