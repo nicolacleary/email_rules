@@ -65,3 +65,7 @@ def render_rule(rule: Rule) -> RenderedRule:
             actions=[render_rule_action(action) for action in rule.actions],
         ).render()
     )
+
+
+def render_proton_email_rules_file(rules: list[Rule]) -> str:
+    return Templates.PROTON_EMAIL_RULES_FILE(rendered_rules=[render_rule(rule) for rule in rules]).render()

@@ -5,7 +5,7 @@ import pytest
 from email_rules.core.type_defs import EmailAddress, EmailSubject, EmailTag, EmailTo
 from email_rules.exporting._templates import _JinjaTemplate, _to_camel_case
 from email_rules.exporting.templates import Templates
-from email_rules.exporting.type_defs import RenderedRuleAction, RenderedRuleFilter
+from email_rules.exporting.type_defs import RenderedRule, RenderedRuleAction, RenderedRuleFilter
 
 from tests.exporting.common import TEST_DATA_TEMPLATES_DIR
 
@@ -98,6 +98,16 @@ def test_to_camel_case(text: str, expected: str) -> None:
             ),
             TEST_DATA_TEMPLATES_DIR / "rule_with_two_tags.txt",
             id="rule_with_two_tags",
+        ),
+        pytest.param(
+            Templates.PROTON_EMAIL_RULES_FILE(
+                rendered_rules=[
+                    RenderedRule("some rule 1;"),
+                    RenderedRule("some rule 2;"),
+                ]
+            ),
+            TEST_DATA_TEMPLATES_DIR / "proton_email_rules_file.txt",
+            id="proton_email_rules_file",
         ),
     ],
 )

@@ -1,6 +1,6 @@
 from email_rules.core.type_defs import EmailSubject, EmailTag, EmailTo
 from email_rules.exporting._templates import _JinjaTemplate
-from email_rules.exporting.type_defs import RenderedRuleAction, RenderedRuleFilter
+from email_rules.exporting.type_defs import RenderedRule, RenderedRuleAction, RenderedRuleFilter
 
 
 class ActionTag(_JinjaTemplate):
@@ -36,6 +36,10 @@ class EmailRule(_JinjaTemplate):
     actions: list[RenderedRuleAction]
 
 
+class ProtonEmailRulesFile(_JinjaTemplate):
+    rendered_rules: list[RenderedRule]
+
+
 class Templates:
     ACTION_TAG = ActionTag
     FILTER_COMBINE_AND = FilterCombineAnd
@@ -44,3 +48,4 @@ class Templates:
     FILTER_SUBJECT_EQ = FilterSubjectEq
     FILTER_TO_EQ = FilterToEq
     EMAIL_RULE = EmailRule
+    PROTON_EMAIL_RULES_FILE = ProtonEmailRulesFile
