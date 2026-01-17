@@ -26,6 +26,7 @@ class SieveExtension(StrEnum):
     RELATIONAL = "relational"
     SPAMTEST = "spamtest"
     COMPARATOR_ASCII_NUMERIC = "comparator-i;ascii-numeric"
+    IMAP4FLAGS = "imap4flags"
 
 
 class SieveSectionName(StrEnum):

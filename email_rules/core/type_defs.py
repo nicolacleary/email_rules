@@ -26,10 +26,12 @@ class Email(BaseModel):
 class EmailState(BaseModel):
     tags: set[EmailTag]
     current_folder: EmailFolder
+    is_read: bool
 
     @classmethod
     def create_initial_state(cls) -> Self:
         return cls(
             tags=set(),
             current_folder=INBOX,
+            is_read=False,
         )

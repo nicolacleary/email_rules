@@ -1,9 +1,15 @@
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import pytest
 
-from email_rules.core.type_defs import EmailAddress, EmailFrom, EmailSubject, EmailTag, EmailTo
-from email_rules.rules.basic_actions import RuleActionAddTag
+from email_rules.core.type_defs import EmailAddress, EmailFolder, EmailFrom, EmailSubject, EmailTag, EmailTo
+from email_rules.rules.basic_actions import (
+    RuleActionAddTag,
+    RuleActionMarkAsRead,
+    RuleActionMoveToFolder,
+    RuleActionStopProcessingAllFiles,
+    RuleActionStopProcessingCurrentFile,
+)
 from email_rules.rules.basic_filters import RuleFromEq, RuleSubjectContains, RuleSubjectEq, RuleToEq
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter
 from email_rules.exporting.rendering import SieveRenderer
@@ -20,11 +26,17 @@ from tests.exporting.common import TEST_DATA_TEMPLATES_DIR
             TEST_DATA_TEMPLATES_DIR / "action_tag.txt",
             id="action_tag",
         ),
+        pytest.param(
+            (RuleActionMarkAsRead()),
+            'addflag "\\\\Seen";',
+            id="mark_as_read",
+        ),
     ],
 )
-def test_render_rule_action(action: RuleAction, expected_output: Path) -> None:
+def test_render_rule_action(action: RuleAction, expected_output: Path | str) -> None:
+    expected_output_str = expected_output.read_text() if isinstance(expected_output, Path) else expected_output
     # Just a placeholder to test the function, since this should be a 1-1 rendering
-    assert SieveRenderer().render_rule_action(action) == expected_output.read_text()
+    assert SieveRenderer().render_rule_action(action) == expected_output_str
 
 
 @pytest.mark.parametrize(
@@ -133,3 +145,37 @@ def test_render_rule(rule: Rule, expected_output: Path) -> None:
 )
 def test_render_extensions(dependencies: list[SieveExtension], expected: str | None) -> None:
     assert SieveRenderer().render_extensions(dependencies) == expected
+
+
+@pytest.mark.parametrize(
+    "rule_action, expected",
+    [
+        pytest.param(
+            RuleActionAddTag(tag_to_apply=EmailTag("some_tag")),
+            [SieveExtension.FILEINTO],
+            id="add_tag",
+        ),
+        pytest.param(
+            RuleActionMarkAsRead(),
+            [SieveExtension.IMAP4FLAGS],
+            id="mark_as_read",
+        ),
+        pytest.param(
+            RuleActionMoveToFolder(folder=EmailFolder(PurePosixPath("some_folder"))),
+            [SieveExtension.FILEINTO],
+            id="move_to_folder",
+        ),
+        pytest.param(
+            RuleActionStopProcessingAllFiles(),
+            [],
+            id="stop_processing_all_files",
+        ),
+        pytest.param(
+            RuleActionStopProcessingCurrentFile(),
+            [],
+            id="stop_processing_current_file",
+        ),
+    ],
+)
+def test_get_rule_action_extensions(rule_action: RuleAction, expected: list[SieveExtension]) -> None:
+    assert SieveRenderer().get_rule_action_extensions(rule_action) == expected

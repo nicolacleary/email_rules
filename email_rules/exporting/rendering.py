@@ -2,6 +2,7 @@ from itertools import chain
 
 from email_rules.rules.basic_actions import (
     RuleActionAddTag,
+    RuleActionMarkAsRead,
     RuleActionMoveToFolder,
     RuleActionStopProcessingAllFiles,
     RuleActionStopProcessingCurrentFile,
@@ -36,6 +37,8 @@ class SieveRenderer:
                     folder=rule_action.folder,
                 ).render()
             )
+        if isinstance(rule_action, RuleActionMarkAsRead):
+            return RenderedRuleAction(r'addflag "\\Seen";')
         if type(rule_action) is RuleActionStopProcessingAllFiles:
             return RenderedRuleAction("stop;")
         if type(rule_action) is RuleActionStopProcessingCurrentFile:
@@ -164,6 +167,9 @@ class SieveRenderer:
             return []
         if isinstance(rule_action, RuleActionAddTag) or isinstance(rule_action, RuleActionMoveToFolder):
             return [SieveExtension.FILEINTO]
+        if isinstance(rule_action, RuleActionMarkAsRead):
+            return [SieveExtension.IMAP4FLAGS]
+
         raise ValueError(f"Unsupported type: {type(rule_action)}")
 
     def get_rule_extension_requirements(self, rule: Rule) -> list[SieveExtension]:

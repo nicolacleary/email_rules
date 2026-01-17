@@ -30,3 +30,9 @@ class RuleActionStopProcessingCurrentFile(RuleAction):
 class RuleActionStopProcessingAllFiles(RuleAction):
     def apply(self, email_state: EmailState) -> EmailState:
         raise RuleActionStopProcessingAllFilesException()
+
+
+class RuleActionMarkAsRead(RuleAction):
+    def apply(self, email_state: EmailState) -> EmailState:
+        email_state.is_read = True
+        return email_state
