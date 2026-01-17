@@ -4,7 +4,7 @@ import pytest
 
 from email_rules.core.type_defs import EmailAddress, EmailFrom, EmailSubject, EmailTag, EmailTo
 from email_rules.rules.basic_actions import RuleActionAddTag
-from email_rules.rules.basic_filters import RuleFromEq, RuleSubjectEq, RuleToEq
+from email_rules.rules.basic_filters import RuleFromEq, RuleSubjectContains, RuleSubjectEq, RuleToEq
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter
 from email_rules.exporting.rendering import render_rule, render_rule_action, render_rule_filter
 
@@ -44,6 +44,36 @@ def test_render_rule_action(action: RuleAction, expected_output: Path) -> None:
             (RuleFromEq(text=EmailFrom(EmailAddress("Some Text")), case_sensitive=False)),
             TEST_DATA_TEMPLATES_DIR / "filter_from_eq_case_insensitive.txt",
             id="filter_from_eq_case_insensitive",
+        ),
+        pytest.param(
+            (RuleSubjectEq(text=EmailSubject("Some Text"), case_sensitive=False)),
+            TEST_DATA_TEMPLATES_DIR / "filter_subject_eq_case_insensitive.txt",
+            id="filter_subject_eq_case_insensitive",
+        ),
+        pytest.param(
+            (RuleSubjectEq(text=EmailSubject("Some Text"), case_sensitive=True)),
+            TEST_DATA_TEMPLATES_DIR / "filter_subject_eq_case_sensitive.txt",
+            id="filter_subject_eq_case_sensitive",
+        ),
+        pytest.param(
+            (RuleSubjectContains(text=EmailSubject("Some Text"), case_sensitive=False)),
+            TEST_DATA_TEMPLATES_DIR / "filter_subject_contains_case_insensitive.txt",
+            id="filter_subject_contains_case_insensitive",
+        ),
+        pytest.param(
+            (RuleSubjectContains(text=EmailSubject("Some Text"), case_sensitive=True)),
+            TEST_DATA_TEMPLATES_DIR / "filter_subject_contains_case_sensitive.txt",
+            id="filter_subject_contains_case_sensitive",
+        ),
+        pytest.param(
+            (RuleToEq(text=EmailTo(EmailAddress("Some Text")), case_sensitive=False)),
+            TEST_DATA_TEMPLATES_DIR / "filter_to_eq_case_insensitive.txt",
+            id="filter_to_eq_case_insensitive",
+        ),
+        pytest.param(
+            (RuleToEq(text=EmailTo(EmailAddress("Some Text")), case_sensitive=True)),
+            TEST_DATA_TEMPLATES_DIR / "filter_to_eq_case_sensitive.txt",
+            id="filter_to_eq_case_sensitive",
         ),
     ],
 )

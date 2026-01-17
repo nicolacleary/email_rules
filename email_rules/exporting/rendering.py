@@ -73,26 +73,38 @@ def render_rule_filter(rule_filter: RuleFilter) -> RenderedRuleFilter:
         )
 
     if type(rule_filter) is RuleSubjectContains:
+        section_name, section_part = SieveSection.get_section_name_and_part(SieveSection.HEADER_SUBJECT)
         return RenderedRuleFilter(
-            Templates.FILTER_SUBJECT_CONTAINS(
+            Templates.FILTER_GENERIC(
                 text=rule_filter.text,
                 case_sensitive=rule_filter.case_sensitive,
+                operation=SieveComparisonOperator.CONTAINS,
+                section_name=section_name,
+                section_part=section_part,
             ).render()
         )
 
     if type(rule_filter) is RuleSubjectEq:
+        section_name, section_part = SieveSection.get_section_name_and_part(SieveSection.HEADER_SUBJECT)
         return RenderedRuleFilter(
-            Templates.FILTER_SUBJECT_EQ(
+            Templates.FILTER_GENERIC(
                 text=rule_filter.text,
                 case_sensitive=rule_filter.case_sensitive,
+                operation=SieveComparisonOperator.EQ,
+                section_name=section_name,
+                section_part=section_part,
             ).render()
         )
 
     if type(rule_filter) is RuleToEq:
+        section_name, section_part = SieveSection.get_section_name_and_part(SieveSection.ADDRESS_TO)
         return RenderedRuleFilter(
-            Templates.FILTER_TO_EQ(
+            Templates.FILTER_GENERIC(
                 text=rule_filter.text,
                 case_sensitive=rule_filter.case_sensitive,
+                operation=SieveComparisonOperator.EQ,
+                section_name=section_name,
+                section_part=section_part,
             ).render()
         )
 

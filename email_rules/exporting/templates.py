@@ -1,4 +1,4 @@
-from email_rules.core.type_defs import EmailFolder, EmailSubject, EmailTag, EmailTo
+from email_rules.core.type_defs import EmailFolder, EmailTag
 from email_rules.exporting._templates import _JinjaTemplate
 from email_rules.exporting.type_defs import (
     RenderedRule,
@@ -24,21 +24,6 @@ class FilterGeneric(_JinjaTemplate):
     operation: SieveComparisonOperator
     section_name: SieveSectionName
     section_part: SieveSectionPart
-
-
-class FilterSubjectContains(_JinjaTemplate):
-    text: EmailSubject
-    case_sensitive: bool
-
-
-class FilterSubjectEq(_JinjaTemplate):
-    text: EmailSubject
-    case_sensitive: bool
-
-
-class FilterToEq(_JinjaTemplate):
-    text: EmailTo
-    case_sensitive: bool
 
 
 class FilterCombineAnd(_JinjaTemplate):
@@ -72,8 +57,5 @@ class Templates:
     FILTER_COMBINE_NOT = FilterCombineNot
     FILTER_COMBINE_OR = FilterCombineOr
     FILTER_GENERIC = FilterGeneric
-    FILTER_SUBJECT_CONTAINS = FilterSubjectContains
-    FILTER_SUBJECT_EQ = FilterSubjectEq
-    FILTER_TO_EQ = FilterToEq
     EMAIL_RULE = EmailRule
     PROTON_EMAIL_RULES_FILE = ProtonEmailRulesFile

@@ -2,7 +2,7 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
-from email_rules.core.type_defs import EmailAddress, EmailFolder, EmailFrom, EmailSubject, EmailTag, EmailTo
+from email_rules.core.type_defs import EmailAddress, EmailFolder, EmailFrom, EmailTag, EmailTo
 from email_rules.exporting._templates import _JinjaTemplate, _to_camel_case
 from email_rules.exporting.templates import Templates
 from email_rules.exporting.type_defs import (
@@ -68,54 +68,6 @@ def test_to_camel_case(text: str, expected: str) -> None:
             ),
             TEST_DATA_TEMPLATES_DIR / "filter_from_eq_case_sensitive.txt",
             id="filter_from_eq_case_sensitive",
-        ),
-        pytest.param(
-            Templates.FILTER_SUBJECT_CONTAINS(
-                case_sensitive=False,
-                text=EmailSubject("Some Text"),
-            ),
-            TEST_DATA_TEMPLATES_DIR / "filter_subject_contains_case_insensitive.txt",
-            id="filter_subject_contains_case_insensitive",
-        ),
-        pytest.param(
-            Templates.FILTER_SUBJECT_CONTAINS(
-                case_sensitive=True,
-                text=EmailSubject("Some Text"),
-            ),
-            TEST_DATA_TEMPLATES_DIR / "filter_subject_contains_case_sensitive.txt",
-            id="filter_subject_contains_case_sensitive",
-        ),
-        pytest.param(
-            Templates.FILTER_SUBJECT_EQ(
-                case_sensitive=False,
-                text=EmailSubject("Some Text"),
-            ),
-            TEST_DATA_TEMPLATES_DIR / "filter_subject_eq_case_insensitive.txt",
-            id="filter_subject_eq_case_insensitive",
-        ),
-        pytest.param(
-            Templates.FILTER_SUBJECT_EQ(
-                case_sensitive=True,
-                text=EmailSubject("Some Text"),
-            ),
-            TEST_DATA_TEMPLATES_DIR / "filter_subject_eq_case_sensitive.txt",
-            id="filter_subject_eq_case_sensitive",
-        ),
-        pytest.param(
-            Templates.FILTER_TO_EQ(
-                case_sensitive=False,
-                text=EmailTo(EmailAddress("Some Text")),
-            ),
-            TEST_DATA_TEMPLATES_DIR / "filter_to_eq_case_insensitive.txt",
-            id="filter_to_eq_case_insensitive",
-        ),
-        pytest.param(
-            Templates.FILTER_TO_EQ(
-                case_sensitive=True,
-                text=EmailTo(EmailAddress("Some Text")),
-            ),
-            TEST_DATA_TEMPLATES_DIR / "filter_to_eq_case_sensitive.txt",
-            id="filter_to_eq_case_sensitive",
         ),
         pytest.param(
             Templates.FILTER_COMBINE_AND(
