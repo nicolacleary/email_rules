@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-from enum import Enum, auto
-from typing import Callable, Iterable, Self, Sequence
+from typing import Callable, Self
 
 from pydantic import BaseModel, model_validator
 
@@ -95,100 +94,16 @@ class RuleActionStopProcessingAllFilesException(Exception):
     pass
 
 
-class RuleActionApplicationState(Enum):
-    CONTINUE = auto()
-    STOP_PROCESSING_CURRENT_FILE = auto()
-    STOP_PROCESSING_ALL_FILES = auto()
-
-
 class RuleAction(BaseModel, ABC):
     @abstractmethod
     def apply(self, email_state: EmailState) -> EmailState:
         pass
 
 
-class RuleApplication(BaseModel):
-    email_state: EmailState
-    rule_application_state: RuleActionApplicationState
-    current_rule: str | None
-    current_rule_applied: bool
-    current_action: str | None
-
-    @classmethod
-    def create_initial_state(cls) -> Self:
-        return cls(
-            email_state=EmailState.create_initial_state(),
-            rule_application_state=RuleActionApplicationState.CONTINUE,
-            current_rule=None,
-            current_rule_applied=False,
-            current_action=None,
-        )
-
-
 class Rule(BaseModel):
     filter_expr: RuleFilter
     actions: list[RuleAction]
     comment: str | None = None
-
-    def apply_rule_to_email(self, email: Email, email_state: EmailState) -> Iterable[RuleApplication]:
-        rule_application_state = RuleActionApplicationState.CONTINUE
-        if not self.filter_expr.evaluate(email):
-            yield RuleApplication(
-                email_state=email_state,
-                rule_application_state=rule_application_state,
-                current_rule=repr(self),
-                current_rule_applied=False,
-                current_action=None,
-            )
-            return
-
-        for action in self.actions:
-            if rule_application_state != RuleActionApplicationState.CONTINUE:
-                break
-            try:
-                email_state = action.apply(email_state)
-            except RuleActionStopProcessingCurrentFileException:
-                rule_application_state = RuleActionApplicationState.STOP_PROCESSING_CURRENT_FILE
-            except RuleActionStopProcessingAllFilesException:
-                rule_application_state = RuleActionApplicationState.STOP_PROCESSING_ALL_FILES
-
-            yield RuleApplication(
-                email_state=email_state,
-                rule_application_state=rule_application_state,
-                current_rule=repr(self),
-                current_rule_applied=True,
-                current_action=repr(action),
-            )
-
-        yield RuleApplication(
-            email_state=email_state,
-            rule_application_state=rule_application_state,
-            current_rule=repr(self),
-            current_rule_applied=True,
-            current_action=None,
-        )
-
-    @staticmethod
-    def apply_rules_to_email_iteratively(email: Email, rules: Sequence["Rule"]) -> Iterable[RuleApplication]:
-        state = RuleApplication.create_initial_state()
-        yield state
-
-        for rule in rules:
-            if state.rule_application_state != RuleActionApplicationState.CONTINUE:
-                break
-
-            for step in rule.apply_rule_to_email(email, state.email_state):
-                yield step
-                state = step
-
-    @staticmethod
-    def apply_rules_to_email(email: Email, rules: Sequence["Rule"]) -> RuleApplication:
-        if len(rules) == 0:
-            return RuleApplication.create_initial_state()
-
-        states = list(Rule.apply_rules_to_email_iteratively(email, rules))
-        assert len(states) > 0, "We should always have the initial state at least"
-        return states[-1]
 
     def __repr__(self) -> str:
         actions_repr = "[" + ", ".join([repr(action) for action in self.actions]) + "]"

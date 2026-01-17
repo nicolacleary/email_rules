@@ -3,8 +3,10 @@ from typing import Sequence
 import pytest
 
 from email_rules.core.type_defs import Email, EmailState
-from email_rules.rules.type_defs import Rule, RuleAction, RuleActionApplicationState, RuleApplication, RuleFilter
+from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter
 from email_rules.rules.basic_actions import RuleActionStopProcessingAllFiles, RuleActionStopProcessingCurrentFile
+from email_rules.simulation_framework.type_defs import RuleActionApplicationState, RuleApplication
+from email_rules.simulation_framework.rule_application import apply_rules_to_email, apply_rules_to_email_iteratively
 
 from tests.rules.common import ALWAYS_FALSE, ALWAYS_TRUE, RuleActionDoNothingAndTrackCalls
 
@@ -62,7 +64,7 @@ class TestApply:
         self, action_order: list[int], do_nothing_actions: list[RuleActionDoNothingAndTrackCalls], generic_email: Email
     ) -> None:
         rule = create_rule(action_order, ALWAYS_TRUE, do_nothing_actions)
-        Rule.apply_rules_to_email(generic_email, [rule])
+        apply_rules_to_email(generic_email, [rule])
         assert RuleActionDoNothingAndTrackCalls.calls == action_order
 
     @pytest.mark.parametrize(
@@ -80,7 +82,7 @@ class TestApply:
         self, action_order: list[int], do_nothing_actions: list[RuleActionDoNothingAndTrackCalls], generic_email: Email
     ) -> None:
         rule = create_rule(action_order, ALWAYS_FALSE, do_nothing_actions)
-        Rule.apply_rules_to_email(generic_email, [rule])
+        apply_rules_to_email(generic_email, [rule])
         assert RuleActionDoNothingAndTrackCalls.calls == []
 
     @pytest.mark.parametrize(
@@ -116,7 +118,7 @@ class TestApply:
     ) -> None:
         action_order = [i if i != -1 else interrupt_action for i in action_order]
         rule = create_rule(action_order, ALWAYS_TRUE, do_nothing_actions)
-        Rule.apply_rules_to_email(generic_email, [rule])
+        apply_rules_to_email(generic_email, [rule])
         assert RuleActionDoNothingAndTrackCalls.calls == applied
 
     @pytest.mark.parametrize(
@@ -137,7 +139,7 @@ class TestApply:
     ) -> None:
         rule_info = [(action_order, ALWAYS_TRUE) for action_order in action_orders]
         rules = create_rules(rule_info, do_nothing_actions)
-        Rule.apply_rules_to_email(generic_email, rules)
+        apply_rules_to_email(generic_email, rules)
         assert RuleActionDoNothingAndTrackCalls.calls == applied
 
     @pytest.mark.parametrize(
@@ -284,5 +286,5 @@ class TestApply:
         do_nothing_actions: list[RuleActionDoNothingAndTrackCalls],
     ) -> None:
         rules = create_rules(rule_info, do_nothing_actions)
-        all_states = list(Rule.apply_rules_to_email_iteratively(generic_email, rules))
+        all_states = list(apply_rules_to_email_iteratively(generic_email, rules))
         assert all_states == expected_states
