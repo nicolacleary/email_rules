@@ -1,9 +1,12 @@
+from itertools import chain
+
 from email_rules.rules.basic_actions import (
     RuleActionAddTag,
     RuleActionMoveToFolder,
     RuleActionStopProcessingAllFiles,
     RuleActionStopProcessingCurrentFile,
 )
+from email_rules.rules._base_filters import GenericRuleTextEq, GenericRuleTextContains, GenericRuleTextListContains
 from email_rules.rules.basic_filters import RuleFromEq, RuleSubjectContains, RuleSubjectEq, RuleToEq
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter, AggregatedRuleFilter, NegatedRuleFilter
 from email_rules.exporting.templates import Templates
@@ -136,19 +139,53 @@ class SieveRenderer:
             ).render()
         )
 
+    def get_rule_filter_extensions(self, rule_filter: RuleFilter) -> list[SieveExtension]:
+        if type(rule_filter) is AggregatedRuleFilter:
+            return list(chain(*[self.get_rule_filter_extensions(arg) for arg in rule_filter.args]))
+
+        if type(rule_filter) is NegatedRuleFilter:
+            return self.get_rule_filter_extensions(rule_filter.arg_1)
+
+        if (
+            isinstance(rule_filter, GenericRuleTextEq)
+            or isinstance(rule_filter, GenericRuleTextContains)
+            or isinstance(rule_filter, GenericRuleTextListContains)
+        ):
+            if rule_filter.case_sensitive:
+                return [SieveExtension.COMPARATOR_ASCII_NUMERIC]
+            return []
+
+        raise ValueError(f"Unsupported type: {type(rule_filter)}")
+
+    def get_rule_action_extensions(self, rule_action: RuleAction) -> list[SieveExtension]:
+        if isinstance(rule_action, RuleActionStopProcessingAllFiles) or isinstance(
+            rule_action, RuleActionStopProcessingCurrentFile
+        ):
+            return []
+        if isinstance(rule_action, RuleActionAddTag) or isinstance(rule_action, RuleActionMoveToFolder):
+            return [SieveExtension.FILEINTO]
+        raise ValueError(f"Unsupported type: {type(rule_action)}")
+
+    def get_rule_extension_requirements(self, rule: Rule) -> list[SieveExtension]:
+        extensions = []
+        extensions.extend(self.get_rule_filter_extensions(rule.filter_expr))
+        for action in rule.actions:
+            extensions.extend(self.get_rule_action_extensions(action))
+        return extensions
+
+    def get_extension_requirements(self, rules: list[Rule]) -> list[SieveExtension]:
+        extensions: list[SieveExtension] = []
+        for rule in rules:
+            extensions.extend(self.get_rule_extension_requirements(rule))
+        # Ensure we have include if it's there
+        if extensions:
+            extensions.append(SieveExtension.INCLUDE)
+        return extensions
+
     def render_proton_email_rules_file(self, rules: list[Rule]) -> str:
-        DEFAULT_EXTENSIONS = [
-            SieveExtension.FILEINTO,
-            SieveExtension.INCLUDE,
-            SieveExtension.ENVIRONMENT,
-            SieveExtension.VARIABLES,
-            SieveExtension.RELATIONAL,
-            SieveExtension.COMPARATOR_ASCII_NUMERIC,
-            SieveExtension.SPAMTEST,
-        ]
-        rendered_extensions = self.render_extensions(DEFAULT_EXTENSIONS)
+        extensions = self.get_extension_requirements(rules)
 
         return Templates.PROTON_EMAIL_RULES_FILE(
-            extensions=rendered_extensions,
+            extensions=self.render_extensions(extensions),
             rendered_rules=[self.render_rule(rule) for rule in rules],
         ).render()

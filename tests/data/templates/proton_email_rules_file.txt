@@ -1,4 +1,3 @@
-# TODO: This is hardcoded, this should be derived from the rules instead
 require ["fileinto", "include", "environment", "variables", "relational", "comparator-i;ascii-numeric", "spamtest"];
 
 some rule 1;
