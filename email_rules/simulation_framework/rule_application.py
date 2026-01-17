@@ -6,7 +6,12 @@ from email_rules.rules.type_defs import (
     RuleActionStopProcessingCurrentFileException,
     RuleActionStopProcessingAllFilesException,
 )
-from email_rules.simulation_framework.type_defs import RuleApplicationInterruptState, RuleApplicationState
+from email_rules.simulation_framework.type_defs import (
+    RuleApplicationInterruptState,
+    RuleApplicationState,
+    RuleFile,
+    RuleFileApplicationState,
+)
 
 
 def apply_rule_to_email(rule: Rule, email: Email, email_state: EmailState) -> Iterable[RuleApplicationState]:
@@ -48,8 +53,10 @@ def apply_rule_to_email(rule: Rule, email: Email, email_state: EmailState) -> It
     )
 
 
-def apply_rules_to_email_iteratively(email: Email, rules: Sequence["Rule"]) -> Iterable[RuleApplicationState]:
-    current_state = RuleApplicationState.create_initial_state()
+def apply_rules_to_email_iteratively(
+    email: Email, rules: Sequence["Rule"], current_state: RuleApplicationState | None = None
+) -> Iterable[RuleApplicationState]:
+    current_state = RuleApplicationState.create_initial_state() if not current_state else current_state
     yield current_state
 
     for rule in rules:
@@ -68,3 +75,58 @@ def apply_rules_to_email(email: Email, rules: Sequence["Rule"]) -> RuleApplicati
     states = list(apply_rules_to_email_iteratively(email, rules))
     assert len(states) > 0, "We should always have the initial state at least"
     return states[-1]
+
+
+def apply_rule_files_to_email_iteratively(
+    email: Email, rule_files: Sequence[RuleFile]
+) -> Iterable[RuleFileApplicationState]:
+    current_file_state = RuleFileApplicationState.create_initial_state()
+    yield current_file_state
+    last_application_state = current_file_state.last_rule_application_state
+
+    for rule_file in rule_files:
+        # We yield the initial state above, so there is no need to provide it again
+        rule_application_state_history = list(
+            apply_rules_to_email_iteratively(email, rule_file.rules, last_application_state)
+        )[1:]
+
+        current_file_state = RuleFileApplicationState(
+            current_file_name=rule_file.file_name,
+            rule_application_state_history=rule_application_state_history,
+        )
+        yield current_file_state
+        last_application_state = current_file_state.last_rule_application_state
+
+        if (
+            last_application_state.rule_application_interrupt_state
+            == RuleApplicationInterruptState.STOP_PROCESSING_ALL_FILES
+        ):
+            break
+        last_application_state = RuleApplicationState(
+            email_state=last_application_state.email_state,
+            rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+            current_rule=None,
+            current_rule_applied=False,
+            current_action=None,
+        )
+
+
+def display_rule_file_application_states(file_states: list[RuleFileApplicationState]) -> str:
+    lines = []
+
+    for file_state in file_states:
+        lines.append(str(file_state.current_file_name))
+        for rule_application_state in file_state.rule_application_state_history:
+            lines.append(
+                "".join(
+                    [
+                        "\t",
+                        "current_rule=" + str(rule_application_state.current_rule),
+                        " current_rule_applied=" + str(rule_application_state.current_rule_applied),
+                        " current_action=" + str(rule_application_state.current_action),
+                        " interrupt_state=" + str(rule_application_state.rule_application_interrupt_state),
+                    ]
+                )
+            )
+
+    return "\n".join(lines)

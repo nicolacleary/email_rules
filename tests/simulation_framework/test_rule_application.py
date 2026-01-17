@@ -5,8 +5,18 @@ import pytest
 from email_rules.core.type_defs import Email, EmailState
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter
 from email_rules.rules.basic_actions import RuleActionStopProcessingAllFiles, RuleActionStopProcessingCurrentFile
-from email_rules.simulation_framework.type_defs import RuleApplicationInterruptState, RuleApplicationState
-from email_rules.simulation_framework.rule_application import apply_rules_to_email, apply_rules_to_email_iteratively
+from email_rules.simulation_framework.type_defs import (
+    RuleApplicationInterruptState,
+    RuleApplicationState,
+    RuleFile,
+    RuleFileApplicationState,
+)
+from email_rules.simulation_framework.rule_application import (
+    apply_rules_to_email,
+    apply_rules_to_email_iteratively,
+    apply_rule_files_to_email_iteratively,
+    display_rule_file_application_states,
+)
 
 from tests.rules.common import ALWAYS_FALSE, ALWAYS_TRUE, RuleActionDoNothingAndTrackCalls
 
@@ -45,6 +55,18 @@ def create_rules(
     return [
         create_rule(action_order, filter_expr, do_nothing_actions, comment=f"rule_{i}")
         for i, (action_order, filter_expr) in enumerate(rule_info)
+    ]
+
+
+def create_rule_file(
+    rule_info_for_files: Sequence[Sequence[RuleInfo]], do_nothing_actions: list[RuleActionDoNothingAndTrackCalls]
+) -> Sequence[RuleFile]:
+    return [
+        RuleFile(
+            file_name=f"file_{i}",
+            rules=list(create_rules(rule_info, do_nothing_actions)),
+        )
+        for i, rule_info in enumerate(rule_info_for_files)
     ]
 
 
@@ -288,3 +310,223 @@ class TestApply:
         rules = create_rules(rule_info, do_nothing_actions)
         all_states = list(apply_rules_to_email_iteratively(generic_email, rules))
         assert all_states == expected_states
+
+    @pytest.mark.parametrize(
+        "rule_info_for_files, expected_states",
+        [
+            pytest.param([], [RuleFileApplicationState.create_initial_state()], id="empty"),
+            pytest.param(
+                [
+                    [([], ALWAYS_TRUE)],
+                ],
+                [
+                    RuleFileApplicationState.create_initial_state(),
+                    RuleFileApplicationState(
+                        current_file_name="file_0",
+                        rule_application_state_history=[
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[]>",
+                                current_rule_applied=True,
+                                current_action=None,
+                            ),
+                        ],
+                    ),
+                ],
+                id="one_file_one_rule_no_actions",
+            ),
+            pytest.param(
+                [
+                    [([1], ALWAYS_TRUE)],
+                ],
+                [
+                    RuleFileApplicationState.create_initial_state(),
+                    RuleFileApplicationState(
+                        current_file_name="file_0",
+                        rule_application_state_history=[
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_1]>",
+                                current_rule_applied=True,
+                                current_action="DO_NOTHING_1",
+                            ),
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_1]>",
+                                current_rule_applied=True,
+                                current_action=None,
+                            ),
+                        ],
+                    ),
+                ],
+                id="one_rule_file_one_rule_one_action",
+            ),
+            pytest.param(
+                [
+                    [([0, 1, 2], ALWAYS_TRUE)],
+                    [([2, 1, 0], ALWAYS_FALSE)],
+                ],
+                [
+                    RuleFileApplicationState.create_initial_state(),
+                    RuleFileApplicationState(
+                        current_file_name="file_0",
+                        rule_application_state_history=[
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0, DO_NOTHING_1, DO_NOTHING_2]>",  # noqa: E501
+                                current_rule_applied=True,
+                                current_action="DO_NOTHING_0",
+                            ),
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0, DO_NOTHING_1, DO_NOTHING_2]>",  # noqa: E501
+                                current_rule_applied=True,
+                                current_action="DO_NOTHING_1",
+                            ),
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0, DO_NOTHING_1, DO_NOTHING_2]>",  # noqa: E501
+                                current_rule_applied=True,
+                                current_action="DO_NOTHING_2",
+                            ),
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_0, DO_NOTHING_1, DO_NOTHING_2]>",  # noqa: E501
+                                current_rule_applied=True,
+                                current_action=None,
+                            ),
+                        ],
+                    ),
+                    RuleFileApplicationState(
+                        current_file_name="file_1",
+                        rule_application_state_history=[
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+                                current_rule="<rule_0 filter_expr=FALSE, actions=[DO_NOTHING_2, DO_NOTHING_1, DO_NOTHING_0]>",  # noqa: E501
+                                current_rule_applied=False,
+                                current_action=None,
+                            ),
+                        ],
+                    ),
+                ],
+                id="two_files_two_rules_multiple_actions_skip_second",
+            ),
+            pytest.param(
+                [
+                    [([-1, 0], ALWAYS_TRUE)],
+                    [([1], ALWAYS_TRUE)],
+                    [([2], ALWAYS_TRUE)],
+                ],
+                [
+                    RuleFileApplicationState.create_initial_state(),
+                    RuleFileApplicationState(
+                        current_file_name="file_0",
+                        rule_application_state_history=[
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.STOP_PROCESSING_ALL_FILES,  # noqa: E501
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[STOP_ALL_FILES, DO_NOTHING_0]>",
+                                current_rule_applied=True,
+                                current_action="STOP_ALL_FILES",
+                            ),
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.STOP_PROCESSING_ALL_FILES,  # noqa: E501
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[STOP_ALL_FILES, DO_NOTHING_0]>",
+                                current_rule_applied=True,
+                                current_action=None,
+                            ),
+                        ],
+                    ),
+                ],
+                id="three_files_stop_all_after_first",
+            ),
+            pytest.param(
+                [
+                    [([-2, 0], ALWAYS_TRUE)],
+                    [([1], ALWAYS_TRUE)],
+                    [([2], ALWAYS_TRUE)],
+                ],
+                [
+                    RuleFileApplicationState.create_initial_state(),
+                    RuleFileApplicationState(
+                        current_file_name="file_0",
+                        rule_application_state_history=[
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.STOP_PROCESSING_CURRENT_FILE,  # noqa: E501
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[STOP_CURRENT_FILE, DO_NOTHING_0]>",
+                                current_rule_applied=True,
+                                current_action="STOP_CURRENT_FILE",
+                            ),
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.STOP_PROCESSING_CURRENT_FILE,  # noqa: E501
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[STOP_CURRENT_FILE, DO_NOTHING_0]>",
+                                current_rule_applied=True,
+                                current_action=None,
+                            ),
+                        ],
+                    ),
+                    RuleFileApplicationState(
+                        current_file_name="file_1",
+                        rule_application_state_history=[
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_1]>",
+                                current_rule_applied=True,
+                                current_action="DO_NOTHING_1",
+                            ),
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_1]>",
+                                current_rule_applied=True,
+                                current_action=None,
+                            ),
+                        ],
+                    ),
+                    RuleFileApplicationState(
+                        current_file_name="file_2",
+                        rule_application_state_history=[
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_2]>",
+                                current_rule_applied=True,
+                                current_action="DO_NOTHING_2",
+                            ),
+                            RuleApplicationState(
+                                email_state=EmailState.create_initial_state(),
+                                rule_application_interrupt_state=RuleApplicationInterruptState.CONTINUE,
+                                current_rule="<rule_0 filter_expr=TRUE, actions=[DO_NOTHING_2]>",
+                                current_rule_applied=True,
+                                current_action=None,
+                            ),
+                        ],
+                    ),
+                ],
+                id="three_files_stop_first_but_continue",
+            ),
+        ],
+    )
+    def test_iterative_application_with_rule_files(
+        self,
+        rule_info_for_files: list[list[RuleInfo]],
+        expected_states: list[RuleFileApplicationState],
+        generic_email: Email,
+        do_nothing_actions: list[RuleActionDoNothingAndTrackCalls],
+    ) -> None:
+        rule_files = create_rule_file(rule_info_for_files, do_nothing_actions)
+        all_states = list(apply_rule_files_to_email_iteratively(generic_email, rule_files))
+
+        assert display_rule_file_application_states(expected_states) == display_rule_file_application_states(all_states)
