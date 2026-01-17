@@ -1,14 +1,7 @@
 # TODO: This is hardcoded, this should be derived from the rules instead
 {% if extensions -%}
 {{ extensions }}
-
 {% endif -%}
-# Generated: Do not run this script on spam messages
-if allof (environment :matches "vnd.proton.spam-threshold" "*",
-spamtest :value "ge" :comparator "i;ascii-numeric" "${1}")
-{
-    return;
-}
 {% for rule in rendered_rules %}
 {{ rule }}
 {% endfor %}
