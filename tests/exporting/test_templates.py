@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from email_rules.core.type_defs import EmailSubject, EmailTag
+from email_rules.core.type_defs import EmailAddress, EmailSubject, EmailTag, EmailTo
 from email_rules.exporting._templates import _JinjaTemplate, _to_camel_case
 from email_rules.exporting.templates import Templates
 
@@ -46,6 +46,20 @@ def test_to_camel_case(text: str, expected: str) -> None:
                 text=EmailSubject("Some Text"),
             ),
             TEST_DATA_TEMPLATES_DIR / "filter_subject_eq_case_sensitive.txt",
+        ),
+        (
+            Templates.FILTER_TO_EQ(
+                case_sensitive=False,
+                text=EmailTo(EmailAddress("Some Text")),
+            ),
+            TEST_DATA_TEMPLATES_DIR / "filter_to_eq_case_insensitive.txt",
+        ),
+        (
+            Templates.FILTER_TO_EQ(
+                case_sensitive=True,
+                text=EmailTo(EmailAddress("Some Text")),
+            ),
+            TEST_DATA_TEMPLATES_DIR / "filter_to_eq_case_sensitive.txt",
         ),
     ],
 )

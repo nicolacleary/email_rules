@@ -1,0 +1,1 @@
+address :is {% if case_sensitive -%} :comparator "i;octet" "to" "{{ text }}" {%- else -%} "to" "{{ text | lower }}" {%- endif -%}
