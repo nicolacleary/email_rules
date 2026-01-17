@@ -1,7 +1,7 @@
 import pytest
 
 from email_rules.core.type_defs import Email
-from email_rules.rules.type_defs import Rule, RuleAction
+from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter
 from email_rules.rules.basic_actions import RuleActionStopProcessingAllFiles, RuleActionStopProcessingCurrentFile
 
 from tests.rules.common import ALWAYS_FALSE, ALWAYS_TRUE, RuleActionDoNothingAndTrackCalls
@@ -13,9 +13,25 @@ def do_nothing_actions() -> list[RuleActionDoNothingAndTrackCalls]:
     return [RuleActionDoNothingAndTrackCalls(instance=i) for i in range(3)]
 
 
+def create_rule(
+    action_order: list[int], filter_expr: RuleFilter, do_nothing_actions: list[RuleActionDoNothingAndTrackCalls]
+) -> Rule:
+    actions: list[RuleAction] = []
+    for i in action_order:
+        match i:
+            case -1:
+                actions.append(RuleActionStopProcessingAllFiles())
+            case -2:
+                actions.append(RuleActionStopProcessingCurrentFile())
+            case _:
+                actions.append(do_nothing_actions[i])
+
+    return Rule(filter_expr=filter_expr, actions=actions)
+
+
 class TestApply:
     @pytest.mark.parametrize(
-        "order",
+        "action_order",
         [
             pytest.param([], id="empty"),
             pytest.param([0], id="apply_1"),
@@ -26,17 +42,14 @@ class TestApply:
         ],
     )
     def test_order(
-        self, order: list[int], do_nothing_actions: list[RuleActionDoNothingAndTrackCalls], generic_email: Email
+        self, action_order: list[int], do_nothing_actions: list[RuleActionDoNothingAndTrackCalls], generic_email: Email
     ) -> None:
-        rule = Rule(
-            filter_expr=ALWAYS_TRUE,
-            actions=[do_nothing_actions[i] for i in order],
-        )
+        rule = create_rule(action_order, ALWAYS_TRUE, do_nothing_actions)
         Rule.apply_rules_to_email(generic_email, [rule])
-        assert RuleActionDoNothingAndTrackCalls.calls == order
+        assert RuleActionDoNothingAndTrackCalls.calls == action_order
 
     @pytest.mark.parametrize(
-        "order",
+        "action_order",
         [
             pytest.param([], id="empty"),
             pytest.param([0], id="apply_1"),
@@ -47,12 +60,9 @@ class TestApply:
         ],
     )
     def test_does_not_apply_when_expression_is_false(
-        self, order: list[int], do_nothing_actions: list[RuleActionDoNothingAndTrackCalls], generic_email: Email
+        self, action_order: list[int], do_nothing_actions: list[RuleActionDoNothingAndTrackCalls], generic_email: Email
     ) -> None:
-        rule = Rule(
-            filter_expr=ALWAYS_FALSE,
-            actions=[do_nothing_actions[i] for i in order],
-        )
+        rule = create_rule(action_order, ALWAYS_FALSE, do_nothing_actions)
         Rule.apply_rules_to_email(generic_email, [rule])
         assert RuleActionDoNothingAndTrackCalls.calls == []
 
@@ -60,17 +70,17 @@ class TestApply:
         "interrupt_action",
         [
             pytest.param(
-                RuleActionStopProcessingAllFiles(),
+                -1,
                 id="all_files",
             ),
             pytest.param(
-                RuleActionStopProcessingCurrentFile(),
+                -2,
                 id="current_file",
             ),
         ],
     )
     @pytest.mark.parametrize(
-        "order, applied",
+        "action_order, applied",
         [
             pytest.param([-1, 0], [], id="stop_before_apply_1"),
             pytest.param([0, -1], [0], id="apply_1"),
@@ -81,15 +91,13 @@ class TestApply:
     )
     def test_interrupt(
         self,
-        interrupt_action: RuleAction,
-        order: list[int],
+        interrupt_action: int,
+        action_order: list[int],
         applied: list[int],
         do_nothing_actions: list[RuleActionDoNothingAndTrackCalls],
         generic_email: Email,
     ) -> None:
-        rule = Rule(
-            filter_expr=ALWAYS_TRUE,
-            actions=[do_nothing_actions[i] if i != -1 else interrupt_action for i in order],
-        )
+        action_order = [i if i != -1 else interrupt_action for i in action_order]
+        rule = create_rule(action_order, ALWAYS_TRUE, do_nothing_actions)
         Rule.apply_rules_to_email(generic_email, [rule])
         assert RuleActionDoNothingAndTrackCalls.calls == applied
