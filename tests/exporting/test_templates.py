@@ -7,9 +7,7 @@ from email_rules.exporting._templates import _JinjaTemplate, _to_camel_case
 from email_rules.exporting.templates import Templates
 from email_rules.exporting.type_defs import RenderedRuleFilter
 
-
-TEST_DATA_DIR = Path(__file__).parent.parent / "data"
-TEST_DATA_TEMPLATES_DIR = TEST_DATA_DIR / "templates"
+from tests.exporting.common import TEST_DATA_TEMPLATES_DIR
 
 
 @pytest.mark.parametrize(

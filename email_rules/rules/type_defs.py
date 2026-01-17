@@ -37,6 +37,9 @@ class AggregatedRuleFilter(RuleFilter):
     arg_2: RuleFilter
     operator: Callable[[bool, bool], bool]
 
+    def is_operator_and(self) -> bool:
+        return not self.operator(True, False)
+
     def evaluate(self, email: Email) -> bool:
         return self.operator(self.arg_1.evaluate(email), self.arg_2.evaluate(email))
 
