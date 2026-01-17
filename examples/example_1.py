@@ -11,8 +11,7 @@ from email_rules.rules import (
     RuleSubjectContains,
 )
 from email_rules.exporting import RenderedRuleFilter, SieveExtension, SieveRenderer
-from email_rules.simulation_framework.type_defs import RuleFile
-from email_rules.simulation_framework.rule_simulation import IterableClass
+from email_rules.simulation_framework import IterableClass, RuleFile
 
 
 OUTPUT_FOLDER = Path(__file__).parent.parent / "z_output"

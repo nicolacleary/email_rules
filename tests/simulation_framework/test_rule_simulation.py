@@ -1,10 +1,6 @@
 from pathlib import PurePosixPath
 
 import pytest
-
-from email_rules.simulation_framework.rule_simulation import EmailRuleSimulation, IterableClass
-
-
 from pydantic import ValidationError
 
 from email_rules.core import Email, EmailFolder, EmailTag
@@ -17,7 +13,7 @@ from email_rules.rules import (
     RuleActionStopProcessingAllFiles,
     RuleActionMarkAsRead,
 )
-from email_rules.simulation_framework.type_defs import RuleFile
+from email_rules.simulation_framework import EmailRuleSimulation, IterableClass, RuleFile
 
 
 # TODO: consolidate with other definition
