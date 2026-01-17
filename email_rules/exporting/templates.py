@@ -1,6 +1,6 @@
 from email_rules.core.type_defs import EmailSubject, EmailTag, EmailTo
 from email_rules.exporting._templates import _JinjaTemplate
-from email_rules.exporting.type_defs import RenderedRuleFilter
+from email_rules.exporting.type_defs import RenderedRuleAction, RenderedRuleFilter
 
 
 class ActionTag(_JinjaTemplate):
@@ -31,6 +31,11 @@ class FilterCombineOr(_JinjaTemplate):
     expr_2: RenderedRuleFilter
 
 
+class EmailRule(_JinjaTemplate):
+    condition: RenderedRuleFilter
+    actions: list[RenderedRuleAction]
+
+
 class Templates:
     ACTION_TAG = ActionTag
     FILTER_COMBINE_AND = FilterCombineAnd
@@ -38,3 +43,4 @@ class Templates:
     FILTER_COMBINE_OR = FilterCombineOr
     FILTER_SUBJECT_EQ = FilterSubjectEq
     FILTER_TO_EQ = FilterToEq
+    EMAIL_RULE = EmailRule

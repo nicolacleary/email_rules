@@ -5,7 +5,7 @@ import pytest
 from email_rules.core.type_defs import EmailAddress, EmailSubject, EmailTag, EmailTo
 from email_rules.exporting._templates import _JinjaTemplate, _to_camel_case
 from email_rules.exporting.templates import Templates
-from email_rules.exporting.type_defs import RenderedRuleFilter
+from email_rules.exporting.type_defs import RenderedRuleAction, RenderedRuleFilter
 
 from tests.exporting.common import TEST_DATA_TEMPLATES_DIR
 
@@ -87,6 +87,17 @@ def test_to_camel_case(text: str, expected: str) -> None:
             ),
             TEST_DATA_TEMPLATES_DIR / "filter_combine_or.txt",
             id="filter_combine_or",
+        ),
+        pytest.param(
+            Templates.EMAIL_RULE(
+                condition=RenderedRuleFilter('header :is "subject" "important"'),
+                actions=[
+                    RenderedRuleAction('fileinto "tag-1";'),
+                    RenderedRuleAction('fileinto "tag-2";'),
+                ],
+            ),
+            TEST_DATA_TEMPLATES_DIR / "rule_with_two_tags.txt",
+            id="rule_with_two_tags",
         ),
     ],
 )
