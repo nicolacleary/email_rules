@@ -1,18 +1,24 @@
 from pathlib import Path, PurePosixPath
 
-from email_rules.core import Email, EmailAddress, EmailFolder, EmailFrom, EmailTag, EmailSubject
+from email_rules.core import (
+    Email,
+    EmailAddress,
+    EmailFolder,
+    EmailFrom,
+    EmailSubject,
+    EmailTag,
+)
+from email_rules.exporting import RenderedRuleFilter, SieveExtension, SieveRenderer
 from email_rules.rules import (
     Rule,
-    RuleFilter,
     RuleActionAddTag,
     RuleActionMoveToFolder,
     RuleActionStopProcessingCurrentFile,
+    RuleFilter,
     RuleFromEq,
     RuleSubjectContains,
 )
-from email_rules.exporting import RenderedRuleFilter, SieveExtension, SieveRenderer
 from email_rules.simulation_framework import IterableClass, RuleFile
-
 
 OUTPUT_FOLDER = Path(__file__).parent.parent / "z_output"
 

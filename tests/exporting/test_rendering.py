@@ -2,23 +2,29 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
-from email_rules.core import EmailAddress, EmailFolder, EmailFrom, EmailSubject, EmailTag, EmailTo
+from email_rules.core import (
+    EmailAddress,
+    EmailFolder,
+    EmailFrom,
+    EmailSubject,
+    EmailTag,
+    EmailTo,
+)
+from email_rules.exporting import SieveExtension, SieveRenderer
 from email_rules.rules import (
+    Rule,
+    RuleAction,
     RuleActionAddTag,
     RuleActionMarkAsRead,
     RuleActionMoveToFolder,
     RuleActionStopProcessingAllFiles,
     RuleActionStopProcessingCurrentFile,
+    RuleFilter,
     RuleFromEq,
     RuleSubjectContains,
     RuleSubjectEq,
     RuleToEq,
-    Rule,
-    RuleAction,
-    RuleFilter,
 )
-from email_rules.exporting import SieveExtension, SieveRenderer
-
 from tests.exporting.common import TEST_DATA_TEMPLATES_DIR
 
 

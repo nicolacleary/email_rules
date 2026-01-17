@@ -1,18 +1,17 @@
 from email_rules.exporting.rendering import SieveRenderer
 from email_rules.exporting.templates import Templates
 from email_rules.exporting.type_defs import (
+    FilterCombineOperation,
     RenderedExtensions,
     RenderedRule,
     RenderedRuleAction,
     RenderedRuleFilter,
-    FilterCombineOperation,
     SieveComparisonOperator,
     SieveExtension,
+    SieveSection,
     SieveSectionName,
     SieveSectionPart,
-    SieveSection,
 )
-
 
 __all__ = (
     # rendering.py

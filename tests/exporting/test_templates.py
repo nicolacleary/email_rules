@@ -3,7 +3,6 @@ from pathlib import Path, PurePosixPath
 import pytest
 
 from email_rules.core import EmailAddress, EmailFolder, EmailFrom, EmailTag, EmailTo
-from email_rules.exporting._templates import _JinjaTemplate, _to_camel_case
 from email_rules.exporting import (
     FilterCombineOperation,
     RenderedExtensions,
@@ -15,7 +14,7 @@ from email_rules.exporting import (
     SieveSectionPart,
     Templates,
 )
-
+from email_rules.exporting._templates import _JinjaTemplate, _to_camel_case
 from tests.exporting.common import TEST_DATA_TEMPLATES_DIR
 
 

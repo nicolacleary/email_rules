@@ -1,10 +1,8 @@
 import pytest
+from example_1 import RULE_FILES, Folders, Tags
 
 from email_rules.core import Email, EmailAddress, EmailFrom, EmailSubject, EmailTo
 from email_rules.simulation_framework import EmailRuleSimulation
-
-from example_1 import Folders, Tags, RULE_FILES
-
 
 # Validating rule behaviour
 

@@ -1,5 +1,9 @@
 from email_rules.core import Email, EmailFrom, EmailSubject, EmailTo
-from email_rules.rules._base_filters import GenericRuleTextContains, GenericRuleTextEq, GenericRuleTextListContains
+from email_rules.rules._base_filters import (
+    GenericRuleTextContains,
+    GenericRuleTextEq,
+    GenericRuleTextListContains,
+)
 
 
 class RuleFromEq(GenericRuleTextEq[EmailFrom]):

@@ -10,6 +10,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "flake8~=7.3",
+    "isort~=7.0.0",
     "mypy~=1.17",
     "pytest~=8.4",
     "ruff==0.12.7",
@@ -60,3 +61,6 @@ exclude = [
 
 [tool.ruff.format]
 quote-style = "double"
+
+[tool.isort]
+profile = "black"

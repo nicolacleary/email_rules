@@ -4,7 +4,6 @@ from typing import Generic, Self, TypeVar, cast
 from email_rules.core import Email
 from email_rules.rules.type_defs import RuleFilter
 
-
 T_str = TypeVar("T_str", bound=str)
 
 

@@ -2,7 +2,6 @@ import pytest
 
 from email_rules.core import Email
 from email_rules.rules import RuleFilter
-
 from tests.rules.common import ALWAYS_FALSE, ALWAYS_TRUE
 
 
