@@ -1,4 +1,4 @@
-from email_rules.core.type_defs import EmailFolder, EmailState, EmailTag
+from email_rules.core import EmailFolder, EmailState, EmailTag
 from email_rules.rules.type_defs import (
     RuleAction,
     RuleActionStopProcessingAllFilesException,

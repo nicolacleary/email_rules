@@ -1,22 +1,19 @@
 from pathlib import PurePosixPath
 
 import pytest
-
-from email_rules.simulation_framework.rule_simulation import EmailRuleSimulation, IterableClass
-
-
 from pydantic import ValidationError
 
-from email_rules.core.type_defs import Email, EmailFolder, EmailTag
-from email_rules.rules.type_defs import Rule, RuleFilter
-from email_rules.rules.basic_actions import (
+from email_rules.core import Email, EmailFolder, EmailTag
+from email_rules.rules import (
+    Rule,
+    RuleFilter,
     RuleActionAddTag,
     RuleActionMoveToFolder,
     RuleActionStopProcessingCurrentFile,
     RuleActionStopProcessingAllFiles,
     RuleActionMarkAsRead,
 )
-from email_rules.simulation_framework.type_defs import RuleFile
+from email_rules.simulation_framework import EmailRuleSimulation, IterableClass, RuleFile
 
 
 # TODO: consolidate with other definition

@@ -2,7 +2,7 @@ from typing import Self
 
 from pydantic import model_validator
 
-from email_rules.core.type_defs import EmailFolder, EmailTag
+from email_rules.core import EmailFolder, EmailTag
 from email_rules.exporting._templates import _JinjaTemplate
 from email_rules.exporting.type_defs import (
     FilterCombineOperation,

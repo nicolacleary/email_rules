@@ -1,7 +1,7 @@
 from typing import Iterable, Sequence
 
-from email_rules.core.type_defs import Email, EmailState
-from email_rules.rules.type_defs import (
+from email_rules.core import Email, EmailState
+from email_rules.rules import (
     Rule,
     RuleActionStopProcessingCurrentFileException,
     RuleActionStopProcessingAllFilesException,

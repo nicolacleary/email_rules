@@ -3,7 +3,7 @@ from typing import Callable, Self
 
 from pydantic import BaseModel, model_validator
 
-from email_rules.core.type_defs import Email, EmailState
+from email_rules.core import Email, EmailState
 
 
 class RuleFilter(BaseModel, ABC):

@@ -1,7 +1,16 @@
 from itertools import chain
 from pathlib import Path
 
-from email_rules.rules.basic_actions import (
+from email_rules.rules import (
+    RuleFromEq,
+    RuleSubjectContains,
+    RuleSubjectEq,
+    RuleToEq,
+    Rule,
+    RuleAction,
+    RuleFilter,
+    AggregatedRuleFilter,
+    NegatedRuleFilter,
     RuleActionAddTag,
     RuleActionMarkAsRead,
     RuleActionMoveToFolder,
@@ -9,8 +18,6 @@ from email_rules.rules.basic_actions import (
     RuleActionStopProcessingCurrentFile,
 )
 from email_rules.rules._base_filters import GenericRuleTextEq, GenericRuleTextContains, GenericRuleTextListContains
-from email_rules.rules.basic_filters import RuleFromEq, RuleSubjectContains, RuleSubjectEq, RuleToEq
-from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter, AggregatedRuleFilter, NegatedRuleFilter
 from email_rules.exporting.templates import Templates
 from email_rules.exporting.type_defs import (
     FilterCombineOperation,
