@@ -10,7 +10,7 @@ T_str = TypeVar("T_str", bound=str)
 
 class GenericRuleTextEq(RuleFilter, Generic[T_str], ABC):
     text: T_str
-    case_sensitive: bool
+    case_sensitive: bool = False
 
     @classmethod
     def create(cls, text: str, case_sensitive: bool = True) -> Self:
@@ -32,7 +32,7 @@ class GenericRuleTextEq(RuleFilter, Generic[T_str], ABC):
 
 class GenericRuleTextContains(RuleFilter, Generic[T_str], ABC):
     text: T_str
-    case_sensitive: bool
+    case_sensitive: bool = False
 
     @classmethod
     def create(cls, text: str, case_sensitive: bool = True) -> Self:
@@ -54,7 +54,7 @@ class GenericRuleTextContains(RuleFilter, Generic[T_str], ABC):
 
 class GenericRuleTextListContains(RuleFilter, Generic[T_str], ABC):
     text: T_str
-    case_sensitive: bool
+    case_sensitive: bool = False
 
     @classmethod
     def create(cls, text: str, case_sensitive: bool = True) -> Self:
