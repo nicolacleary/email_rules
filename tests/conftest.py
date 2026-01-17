@@ -2,7 +2,7 @@ import pytest
 
 from pydantic import ValidationError
 
-from email_rules.core.type_defs import Email, EmailAddress, EmailFrom, EmailTo, EmailSubject
+from email_rules.core import Email, EmailAddress, EmailFrom, EmailTo, EmailSubject
 
 
 @pytest.fixture

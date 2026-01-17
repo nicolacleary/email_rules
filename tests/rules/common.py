@@ -1,6 +1,6 @@
 from typing import ClassVar
 
-from email_rules.core.type_defs import Email, EmailState
+from email_rules.core import Email, EmailState
 from email_rules.rules.type_defs import RuleAction, RuleFilter
 
 

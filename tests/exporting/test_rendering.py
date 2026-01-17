@@ -2,7 +2,7 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
-from email_rules.core.type_defs import EmailAddress, EmailFolder, EmailFrom, EmailSubject, EmailTag, EmailTo
+from email_rules.core import EmailAddress, EmailFolder, EmailFrom, EmailSubject, EmailTag, EmailTo
 from email_rules.rules.basic_actions import (
     RuleActionAddTag,
     RuleActionMarkAsRead,

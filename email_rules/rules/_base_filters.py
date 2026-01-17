@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic, Self, TypeVar, cast
 
-from email_rules.core.type_defs import Email
+from email_rules.core import Email
 from email_rules.rules.type_defs import RuleFilter
 
 

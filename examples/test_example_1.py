@@ -1,6 +1,6 @@
 import pytest
 
-from email_rules.core.type_defs import Email, EmailAddress, EmailFrom, EmailSubject, EmailTo
+from email_rules.core import Email, EmailAddress, EmailFrom, EmailSubject, EmailTo
 from email_rules.simulation_framework.rule_simulation import EmailRuleSimulation
 
 from example_1 import Folders, Tags, RULE_FILES

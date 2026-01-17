@@ -7,7 +7,7 @@ from email_rules.simulation_framework.rule_simulation import EmailRuleSimulation
 
 from pydantic import ValidationError
 
-from email_rules.core.type_defs import Email, EmailFolder, EmailTag
+from email_rules.core import Email, EmailFolder, EmailTag
 from email_rules.rules.type_defs import Rule, RuleFilter
 from email_rules.rules.basic_actions import (
     RuleActionAddTag,

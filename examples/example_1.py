@@ -1,6 +1,6 @@
 from pathlib import Path, PurePosixPath
 
-from email_rules.core.type_defs import Email, EmailAddress, EmailFolder, EmailFrom, EmailTag, EmailSubject
+from email_rules.core import Email, EmailAddress, EmailFolder, EmailFrom, EmailTag, EmailSubject
 from email_rules.rules.type_defs import Rule, RuleFilter
 from email_rules.rules.basic_actions import (
     RuleActionAddTag,

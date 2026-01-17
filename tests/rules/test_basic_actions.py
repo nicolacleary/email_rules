@@ -1,6 +1,6 @@
 from pathlib import PurePosixPath
 
-from email_rules.core.type_defs import EmailFolder, EmailState, EmailTag
+from email_rules.core import EmailFolder, EmailState, EmailTag
 from email_rules.rules.basic_actions import RuleActionAddTag, RuleActionMoveToFolder, RuleActionMarkAsRead
 
 

@@ -1,4 +1,4 @@
-from email_rules.core.type_defs import Email, EmailFrom, EmailSubject, EmailTo
+from email_rules.core import Email, EmailFrom, EmailSubject, EmailTo
 from email_rules.rules._base_filters import GenericRuleTextContains, GenericRuleTextEq, GenericRuleTextListContains
 
 

@@ -1,6 +1,6 @@
 import pytest
 
-from email_rules.core.type_defs import Email
+from email_rules.core import Email
 from email_rules.rules.basic_filters import RuleSubjectEq, RuleSubjectContains, RuleToEq
 
 

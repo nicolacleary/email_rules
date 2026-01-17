@@ -3,7 +3,7 @@ from typing import Self
 
 from pydantic import BaseModel
 
-from email_rules.core.type_defs import EmailState
+from email_rules.core import EmailState
 from email_rules.rules.type_defs import Rule
 
 
