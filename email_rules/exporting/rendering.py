@@ -4,7 +4,7 @@ from email_rules.rules.basic_actions import (
     RuleActionStopProcessingAllFiles,
     RuleActionStopProcessingCurrentFile,
 )
-from email_rules.rules.basic_filters import RuleSubjectEq, RuleToEq
+from email_rules.rules.basic_filters import RuleSubjectContains, RuleSubjectEq, RuleToEq
 from email_rules.rules.type_defs import Rule, RuleAction, RuleFilter, AggregatedRuleFilter, NegatedRuleFilter
 from email_rules.exporting.templates import Templates
 from email_rules.exporting.type_defs import RenderedRule, RenderedRuleAction, RenderedRuleFilter
@@ -51,6 +51,14 @@ def render_rule_filter(rule_filter: RuleFilter) -> RenderedRuleFilter:
         return RenderedRuleFilter(
             Templates.FILTER_COMBINE_NOT(
                 expr_1=render_rule_filter(rule_filter.arg_1),
+            ).render()
+        )
+
+    if type(rule_filter) is RuleSubjectContains:
+        return RenderedRuleFilter(
+            Templates.FILTER_SUBJECT_CONTAINS(
+                text=rule_filter.text,
+                case_sensitive=rule_filter.case_sensitive,
             ).render()
         )
 

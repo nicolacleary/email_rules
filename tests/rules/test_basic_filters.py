@@ -1,7 +1,21 @@
 import pytest
 
 from email_rules.core.type_defs import Email
-from email_rules.rules.basic_filters import RuleSubjectEq, RuleToEq
+from email_rules.rules.basic_filters import RuleSubjectEq, RuleSubjectContains, RuleToEq
+
+
+class TestRuleTextContains:
+    @pytest.mark.parametrize(
+        "text, case_sensitive, expected",
+        [
+            pytest.param("Sub", True, True, id="case_right"),
+            pytest.param("Sub", False, True, id="case_right_and_insensitive"),
+            pytest.param("sub", True, False, id="case_wrong"),
+            pytest.param("sub", False, True, id="case_wrong_but_insensitive"),
+        ],
+    )
+    def test_subject_contains(self, text: str, case_sensitive: bool, expected: bool, generic_email: Email) -> None:
+        assert RuleSubjectContains.create(text, case_sensitive).evaluate(generic_email) == expected
 
 
 class TestRuleTextEq:

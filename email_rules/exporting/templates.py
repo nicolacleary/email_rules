@@ -11,6 +11,11 @@ class ActionTag(_JinjaTemplate):
     tag_name: EmailTag
 
 
+class FilterSubjectContains(_JinjaTemplate):
+    text: EmailSubject
+    case_sensitive: bool
+
+
 class FilterSubjectEq(_JinjaTemplate):
     text: EmailSubject
     case_sensitive: bool
@@ -50,6 +55,7 @@ class Templates:
     FILTER_COMBINE_AND = FilterCombineAnd
     FILTER_COMBINE_NOT = FilterCombineNot
     FILTER_COMBINE_OR = FilterCombineOr
+    FILTER_SUBJECT_CONTAINS = FilterSubjectContains
     FILTER_SUBJECT_EQ = FilterSubjectEq
     FILTER_TO_EQ = FilterToEq
     EMAIL_RULE = EmailRule

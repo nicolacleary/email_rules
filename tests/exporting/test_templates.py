@@ -41,6 +41,22 @@ def test_to_camel_case(text: str, expected: str) -> None:
             id="action_tag",
         ),
         pytest.param(
+            Templates.FILTER_SUBJECT_CONTAINS(
+                case_sensitive=False,
+                text=EmailSubject("Some Text"),
+            ),
+            TEST_DATA_TEMPLATES_DIR / "filter_subject_contains_case_insensitive.txt",
+            id="filter_subject_contains_case_insensitive",
+        ),
+        pytest.param(
+            Templates.FILTER_SUBJECT_CONTAINS(
+                case_sensitive=True,
+                text=EmailSubject("Some Text"),
+            ),
+            TEST_DATA_TEMPLATES_DIR / "filter_subject_contains_case_sensitive.txt",
+            id="filter_subject_contains_case_sensitive",
+        ),
+        pytest.param(
             Templates.FILTER_SUBJECT_EQ(
                 case_sensitive=False,
                 text=EmailSubject("Some Text"),
