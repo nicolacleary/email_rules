@@ -3,19 +3,7 @@ import pytest
 from email_rules.core.type_defs import Email
 from email_rules.rules.type_defs import RuleFilter
 
-
-class RuleAlwaysTrue(RuleFilter):
-    def evaluate(self, email: Email) -> bool:
-        return True
-
-
-class RuleAlwaysFalse(RuleFilter):
-    def evaluate(self, email: Email) -> bool:
-        return False
-
-
-ALWAYS_TRUE = RuleAlwaysTrue()
-ALWAYS_FALSE = RuleAlwaysFalse()
+from tests.rules.common import ALWAYS_FALSE, ALWAYS_TRUE
 
 
 class TestCombination:

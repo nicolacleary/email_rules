@@ -3,7 +3,7 @@ from typing import Callable
 
 from pydantic import BaseModel
 
-from email_rules.core.type_defs import Email
+from email_rules.core.type_defs import Email, EmailState
 
 
 class RuleFilter(BaseModel, ABC):
@@ -55,3 +55,23 @@ class AggregatedRuleFilter(RuleFilter):
             arg_2=arg_2,
             operator=lambda x, y: x or y,
         )
+
+
+class RuleAction(BaseModel, ABC):
+    @abstractmethod
+    def apply(self, email_state: EmailState) -> EmailState:
+        pass
+
+
+class Rule(BaseModel):
+    filter_expr: RuleFilter
+    actions: list[RuleAction]
+
+    def apply_rule_to_email(self, email: Email, email_state: EmailState) -> EmailState:
+        if not self.filter_expr.evaluate(email):
+            return email_state
+
+        for action in self.actions:
+            email_state = action.apply(email_state)
+
+        return email_state
