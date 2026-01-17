@@ -1,5 +1,6 @@
 # Project-specific
 custom_rules_file.py
+custom_rules_file_copy.py
 out.txt
 
 # Byte-compiled / optimized / DLL files
