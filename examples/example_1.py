@@ -1,98 +1,71 @@
 from pathlib import Path, PurePosixPath
 
 from email_rules.core import (
-    Email,
-    EmailAddress,
     EmailFolder,
-    EmailFrom,
     EmailSubject,
     EmailTag,
 )
-from email_rules.exporting import RenderedRuleFilter, SieveExtension, SieveRenderer
+from email_rules.exporting import SieveRenderer
 from email_rules.rules import (
     Rule,
-    RuleActionAddTag,
+    RuleActionMarkAsRead,
     RuleActionMoveToFolder,
     RuleActionStopProcessingCurrentFile,
-    RuleFilter,
-    RuleFromEq,
     RuleSubjectContains,
 )
-from email_rules.simulation_framework import IterableClass, RuleFile
+from email_rules.simulation_framework import (
+    EmailAccountSettings,
+    IterableClass,
+    RuleFile,
+)
 
 OUTPUT_FOLDER = Path(__file__).parent.parent / "z_output"
-
-
-# Custom actions, filters, etc.
-
-
-class SpamTestFilter(RuleFilter):
-    def evaluate(self, email: Email) -> bool:
-        # Spam values aren't modelled in email state
-        return False
 
 
 # Defining Rules
 
 
 class Folders(IterableClass[EmailFolder]):
-    SOME_FOLDER = EmailFolder(PurePosixPath("some_folder"))
+    FEEDBACK_ETC = EmailFolder(PurePosixPath("feedback_etc"))
 
 
 class Tags(IterableClass[EmailTag]):
-    SOME_TAG = EmailTag("SOME_TAG")
+    pass
 
 
 RULE_FILES = [
     RuleFile(
-        file_name="some_rules_file.txt",
+        file_name="example_1.txt",
         rules=[
             Rule(
-                comment="Generated: Do not run this script on spam messages",
-                filter_expr=SpamTestFilter(),
-                actions=[
-                    RuleActionStopProcessingCurrentFile(),
-                ],
-            ),
-            Rule(
-                comment="Tag anything with 'example' in the subject",
-                filter_expr=RuleSubjectContains(
-                    text=EmailSubject("example"),
+                comment="Filter out emails asking for feedback, reviews, etc.",
+                filter_expr=(
+                    RuleSubjectContains(
+                        text=EmailSubject("your feedback is important to us"),
+                    )
+                    | RuleSubjectContains(
+                        text=EmailSubject("Please tell us about your experience"),
+                    )
                 ),
                 actions=[
-                    RuleActionAddTag(tag_to_apply=Tags.SOME_TAG),
+                    RuleActionMoveToFolder(folder=Folders.FEEDBACK_ETC),
+                    RuleActionMarkAsRead(),
                     RuleActionStopProcessingCurrentFile(),
                 ],
-            ),
-            Rule(
-                comment="Move anything from test@example.com to folder",
-                filter_expr=RuleFromEq(
-                    text=EmailFrom(EmailAddress("test@example.com")),
-                ),
-                actions=[RuleActionMoveToFolder(folder=Folders.SOME_FOLDER)],
-            ),
+            )
         ],
     )
 ]
 
 
+EMAIL_ACCOUNT_SETTINGS = EmailAccountSettings(
+    folders=list(Folders.iterate_values()),
+    tags=list(Tags.iterate_values()),
+    rule_files=RULE_FILES,
+)
+
+
 # Rendering
-
-
-class CustomSieveRenderer(SieveRenderer):
-    def get_rule_filter_extensions(self, rule_filter: RuleFilter) -> list[SieveExtension]:
-        if isinstance(rule_filter, SpamTestFilter):
-            return [
-                SieveExtension.SPAMTEST,
-                SieveExtension.COMPARATOR_ASCII_NUMERIC,
-                SieveExtension.RELATIONAL,
-            ]
-        return super().get_rule_filter_extensions(rule_filter)
-
-    def render_rule_filter(self, rule_filter: RuleFilter) -> RenderedRuleFilter:
-        if type(rule_filter) is SpamTestFilter:
-            return RenderedRuleFilter('spamtest :value "ge" :comparator "i;ascii-numeric" "${1}"')
-        return super().render_rule_filter(rule_filter)
 
 
 # TODO - move RuleFile definition so this can be a function in the rendering
@@ -101,6 +74,6 @@ def render_rule_file(renderer: SieveRenderer, rule_file: RuleFile, output_folder
 
 
 if __name__ == "__main__":
-    renderer = CustomSieveRenderer()
+    renderer = SieveRenderer()
     for rule_file in RULE_FILES:
         render_rule_file(renderer, rule_file, OUTPUT_FOLDER)
