@@ -14,6 +14,7 @@ from email_rules.rules import (
     RuleFilter,
 )
 from email_rules.simulation_framework import (
+    EmailAccountSettings,
     EmailRuleSimulation,
     IterableClass,
     RuleFile,
@@ -54,10 +55,10 @@ class TestIterableClass:
 
 class TestEmailRuleSimulationAssertFunctions:
     @pytest.fixture
-    def simulation(self) -> EmailRuleSimulation:
+    def inbox_settings(self) -> EmailAccountSettings:
         # It's fine to just have rules that always apply here because rule application on email conditions
         # is tested per expression type elsewhere
-        return EmailRuleSimulation(
+        return EmailAccountSettings(
             folders=list(Folders.iterate_values()),
             tags=list(Tags.iterate_values()),
             rule_files=[
@@ -71,40 +72,72 @@ class TestEmailRuleSimulationAssertFunctions:
             ],
         )
 
-    def test_is_moved_to_no_error(self, simulation: EmailRuleSimulation, generic_email: Email) -> None:
-        simulation.assert_is_moved_to(generic_email, Folders.PARENT_1)
+    def test_is_moved_to_no_error(self, inbox_settings: EmailAccountSettings, generic_email: Email) -> None:
+        with EmailRuleSimulation(inbox=inbox_settings, email=generic_email) as email_final_state:
+            email_final_state.assert_is_moved_to(Folders.PARENT_1)
 
-    def test_is_moved_to_error(self, simulation: EmailRuleSimulation, generic_email: Email) -> None:
-        with pytest.raises(AssertionError, match="in parent_1, should be in parent_1/child_1"):
-            simulation.assert_is_moved_to(generic_email, Folders.PARENT_1_CHILD_1)
+    def test_is_moved_to_error(self, inbox_settings: EmailAccountSettings, generic_email: Email) -> None:
+        with (
+            pytest.raises(AssertionError, match="in parent_1, should be in parent_1/child_1"),
+            EmailRuleSimulation(inbox=inbox_settings, email=generic_email) as email_final_state,
+        ):
+            email_final_state.assert_is_moved_to(Folders.PARENT_1_CHILD_1)
 
-    def test_has_tag_no_error(self, simulation: EmailRuleSimulation, generic_email: Email) -> None:
-        simulation.assert_has_tag(generic_email, Tags.TAG_1)
+    def test_has_tag_no_error(self, inbox_settings: EmailAccountSettings, generic_email: Email) -> None:
+        with EmailRuleSimulation(inbox=inbox_settings, email=generic_email) as email_final_state:
+            email_final_state.assert_has_tag(Tags.TAG_1)
 
-    def test_has_tag_error(self, simulation: EmailRuleSimulation, generic_email: Email) -> None:
-        with pytest.raises(AssertionError, match="not have tag TAG_2, tags: .'TAG_1'."):
-            simulation.assert_has_tag(generic_email, Tags.TAG_2)
+    def test_has_tag_error(self, inbox_settings: EmailAccountSettings, generic_email: Email) -> None:
+        with (
+            pytest.raises(AssertionError, match="not have tag TAG_2, tags: .'TAG_1'."),
+            EmailRuleSimulation(inbox=inbox_settings, email=generic_email) as email_final_state,
+        ):
+            email_final_state.assert_has_tag(Tags.TAG_2)
 
-    def test_does_not_have_tag_no_error(self, simulation: EmailRuleSimulation, generic_email: Email) -> None:
-        simulation.assert_does_not_have_tag(generic_email, Tags.TAG_2)
+    def test_does_not_have_tag_no_error(self, inbox_settings: EmailAccountSettings, generic_email: Email) -> None:
+        with EmailRuleSimulation(inbox=inbox_settings, email=generic_email) as email_final_state:
+            email_final_state.assert_does_not_have_tag(Tags.TAG_2)
 
-    def test_does_not_have_tag_error(self, simulation: EmailRuleSimulation, generic_email: Email) -> None:
-        with pytest.raises(AssertionError, match="has tag TAG_1, tags: .'TAG_1'."):
-            simulation.assert_does_not_have_tag(generic_email, Tags.TAG_1)
+    def test_does_not_have_tag_error(self, inbox_settings: EmailAccountSettings, generic_email: Email) -> None:
+        with (
+            pytest.raises(AssertionError, match="has tag TAG_1, tags: .'TAG_1'."),
+            EmailRuleSimulation(inbox=inbox_settings, email=generic_email) as email_final_state,
+        ):
+            email_final_state.assert_does_not_have_tag(Tags.TAG_1)
 
-    def test_is_unread(self, simulation: EmailRuleSimulation, generic_email: Email) -> None:
-        simulation.assert_is_unread(generic_email)
-        with pytest.raises(AssertionError, match="Email is unread"):
-            simulation.assert_is_read(generic_email)
+    def test_is_unread(self, inbox_settings: EmailAccountSettings, generic_email: Email) -> None:
+        with EmailRuleSimulation(inbox=inbox_settings, email=generic_email) as email_final_state:
+            email_final_state.assert_is_unread()
+        with (
+            pytest.raises(AssertionError, match="Email is unread"),
+            EmailRuleSimulation(inbox=inbox_settings, email=generic_email) as email_final_state,
+        ):
+            email_final_state.assert_is_read()
 
-    def test_is_read(self, simulation: EmailRuleSimulation, generic_email: Email) -> None:
-        simulation.rule_files[0].rules[0].actions.append(RuleActionMarkAsRead())
-        simulation.assert_is_read(generic_email)
-        with pytest.raises(AssertionError, match="Email is read"):
-            simulation.assert_is_unread(generic_email)
+    def test_is_read(self, inbox_settings: EmailAccountSettings, generic_email: Email) -> None:
+        inbox_settings.rule_files[0].rules[0].actions.append(RuleActionMarkAsRead())
+
+        with EmailRuleSimulation(inbox=inbox_settings, email=generic_email) as email_final_state:
+            email_final_state.assert_is_read()
+        with (
+            pytest.raises(AssertionError, match="Email is read"),
+            EmailRuleSimulation(inbox=inbox_settings, email=generic_email) as email_final_state,
+        ):
+            email_final_state.assert_is_unread()
+
+    def test_assert_email_state_aggregates_errors(
+        self, inbox_settings: EmailAccountSettings, generic_email: Email
+    ) -> None:
+        with (
+            pytest.raises(AssertionError, match="error 1; error 3"),
+            EmailRuleSimulation(inbox=inbox_settings, email=generic_email) as email_final_state,
+        ):
+            email_final_state.assert_email_state(False, "error 1")
+            email_final_state.assert_email_state(True, "error 2")
+            email_final_state.assert_email_state(False, "error 3")
 
 
-class TestEmailRuleSimulationValidation:
+class TestEmailAccountSettingsValidation:
     @pytest.mark.parametrize(
         "folders",
         [
@@ -115,7 +148,7 @@ class TestEmailRuleSimulationValidation:
         ],
     )
     def test_parent_folder_missing_no_errors(self, folders: list[EmailFolder]) -> None:
-        EmailRuleSimulation(
+        EmailAccountSettings(
             folders=folders,
             tags=[],
             rule_files=[],
@@ -129,7 +162,7 @@ class TestEmailRuleSimulationValidation:
     )
     def test_parent_folder_missing_errors(self, folders: list[EmailFolder], error_msg: str) -> None:
         with pytest.raises(ValidationError, match=error_msg):
-            EmailRuleSimulation(
+            EmailAccountSettings(
                 folders=folders,
                 tags=[],
                 rule_files=[],
@@ -160,7 +193,7 @@ class TestEmailRuleSimulationValidation:
         ],
     )
     def test_validate_rules_no_errors(self, rules: list[Rule]) -> None:
-        EmailRuleSimulation(
+        EmailAccountSettings(
             folders=list(Folders.iterate_values()),
             tags=list(Tags.iterate_values()),
             rule_files=[RuleFile(file_name="rule_file_1", rules=rules)],
@@ -213,7 +246,7 @@ class TestEmailRuleSimulationValidation:
     )
     def test_validate_rules_errors(self, rules: list[Rule], error_msg: str) -> None:
         with pytest.raises(ValidationError, match=error_msg):
-            EmailRuleSimulation(
+            EmailAccountSettings(
                 folders=list(Folders.iterate_values()),
                 tags=list(Tags.iterate_values()),
                 rule_files=[RuleFile(file_name="rule_file_1", rules=rules)],

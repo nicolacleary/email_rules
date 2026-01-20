@@ -6,6 +6,7 @@ from email_rules.simulation_framework.rule_application import (
     display_rule_file_application_states,
 )
 from email_rules.simulation_framework.rule_simulation import (
+    EmailAccountSettings,
     EmailRuleSimulation,
     IterableClass,
 )
@@ -25,6 +26,7 @@ __all__ = (
     "display_rule_file_application_states",
     # rule_simulation.py
     "IterableClass",
+    "EmailAccountSettings",
     "EmailRuleSimulation",
     # type_defs.py
     "RuleApplicationInterruptState",
