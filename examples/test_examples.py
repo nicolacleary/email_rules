@@ -59,7 +59,6 @@ class TestExample2:
     def test_tagging_and_moving_same_email(self) -> None:
         email = create_email(
             email_from=EmailFrom(EmailAddress("other-address@example.com")),
-            email_subject=EmailSubject("Won't be tagged"),
         )
         with EmailRuleSimulation(inbox=EXAMPLE_2_ACCOUNT_SETTINGS, email=email) as email_final_state:
             email_final_state.assert_has_tag(EXAMPLE_2_TAGS.SOME_TAG)
