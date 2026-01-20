@@ -1,4 +1,5 @@
 from pathlib import PurePosixPath
+from types import TracebackType
 from typing import Generic, Iterable, Self, TypeVar, cast
 
 from pydantic import BaseModel, model_validator
@@ -17,7 +18,10 @@ from email_rules.simulation_framework.rule_application import (
     apply_rule_files_to_email_iteratively,
     display_rule_file_application_states,
 )
-from email_rules.simulation_framework.type_defs import RuleFile
+from email_rules.simulation_framework.type_defs import (
+    RuleFile,
+    RuleFileApplicationState,
+)
 
 T = TypeVar("T")
 
@@ -31,40 +35,10 @@ class IterableClass(Generic[T]):
             yield cast(T, value)
 
 
-class EmailRuleSimulation(BaseModel):
+class EmailAccountSettings(BaseModel):
     folders: list[EmailFolder]
     tags: list[EmailTag]
     rule_files: list[RuleFile]
-
-    def _get_last_email_state(self, email: Email) -> EmailState:
-        step_history = list(apply_rule_files_to_email_iteratively(email, self.rule_files))
-        # The expected usecase is in pytest so I think it's fine to output to stdout for now
-        print(display_rule_file_application_states(step_history))
-        if len(step_history) == 0:
-            raise ValueError("No email state - this is an issue with the rule application logic")
-        return step_history[-1].last_rule_application_state.email_state
-
-    def assert_is_moved_to(self, email: Email, destination: EmailFolder) -> None:
-        final_email_state = self._get_last_email_state(email)
-        assert final_email_state.current_folder == destination, (
-            f"Email is in {final_email_state.current_folder}, should be in {destination}"
-        )
-
-    def assert_has_tag(self, email: Email, tag: EmailTag) -> None:
-        final_email_state = self._get_last_email_state(email)
-        assert tag in final_email_state.tags, f"Email does not have tag {tag}, tags: {final_email_state.tags}"
-
-    def assert_does_not_have_tag(self, email: Email, tag: EmailTag) -> None:
-        final_email_state = self._get_last_email_state(email)
-        assert tag not in final_email_state.tags, f"Email has tag {tag}, tags: {final_email_state.tags}"
-
-    def assert_is_read(self, email: Email) -> None:
-        final_email_state = self._get_last_email_state(email)
-        assert final_email_state.is_read, "Email is unread"
-
-    def assert_is_unread(self, email: Email) -> None:
-        final_email_state = self._get_last_email_state(email)
-        assert not final_email_state.is_read, "Email is read"
 
     @model_validator(mode="after")
     def check_parent_folders_exist(self) -> Self:
@@ -126,3 +100,65 @@ class EmailRuleSimulation(BaseModel):
             # E.g. if I were to add a custom action then it would not be validated at all
             return f"Cannot validate action (unhandled) {rule_action}"
         return None
+
+    def get_email_state_after_filtering(self, email: Email) -> tuple[EmailState, list[RuleFileApplicationState]]:
+        step_history = list(apply_rule_files_to_email_iteratively(email, self.rule_files))
+        if len(step_history) == 0:
+            raise ValueError("No email state - this is an issue with the rule application logic")
+        return step_history[-1].last_rule_application_state.email_state, step_history
+
+
+class EmailRuleSimulation(object):
+    def __init__(self, inbox: EmailAccountSettings, email: Email, display_state_history: bool = True):
+        final_email_state, email_state_history = inbox.get_email_state_after_filtering(email)
+        self.final_email_state = final_email_state
+        self.email_state_history = email_state_history
+        self._failures: list[str] = []
+        self.display_state_history = display_state_history
+
+    def print_email_state_history(self) -> None:
+        print("File\tRule and action")
+        print()
+        print(display_rule_file_application_states(self.email_state_history))
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        type_: type[BaseException] | None,
+        value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> bool | None:
+        if not self._failures:
+            return None
+        if self.display_state_history:
+            self.print_email_state_history()
+        raise AssertionError("; ".join(self._failures))
+
+    def assert_email_state(self, condition: bool, failure_message: str) -> None:
+        if not condition:
+            self._failures.append(failure_message)
+
+    def assert_is_moved_to(self, destination: EmailFolder) -> None:
+        self.assert_email_state(
+            self.final_email_state.current_folder == destination,
+            f"Email is in {self.final_email_state.current_folder}, should be in {destination}",
+        )
+
+    def assert_has_tag(self, tag: EmailTag) -> None:
+        self.assert_email_state(
+            tag in self.final_email_state.tags,
+            f"Email does not have tag {tag}, tags: {self.final_email_state.tags}",
+        )
+
+    def assert_does_not_have_tag(self, tag: EmailTag) -> None:
+        self.assert_email_state(
+            tag not in self.final_email_state.tags, f"Email has tag {tag}, tags: {self.final_email_state.tags}"
+        )
+
+    def assert_is_read(self) -> None:
+        self.assert_email_state(self.final_email_state.is_read, "Email is unread")
+
+    def assert_is_unread(self) -> None:
+        self.assert_email_state(not self.final_email_state.is_read, "Email is read")
