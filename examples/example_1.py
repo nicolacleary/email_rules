@@ -18,7 +18,11 @@ from email_rules.rules import (
     RuleFromEq,
     RuleSubjectContains,
 )
-from email_rules.simulation_framework import IterableClass, RuleFile
+from email_rules.simulation_framework import (
+    EmailAccountSettings,
+    IterableClass,
+    RuleFile,
+)
 
 OUTPUT_FOLDER = Path(__file__).parent.parent / "z_output"
 
@@ -98,6 +102,13 @@ class CustomSieveRenderer(SieveRenderer):
 # TODO - move RuleFile definition so this can be a function in the rendering
 def render_rule_file(renderer: SieveRenderer, rule_file: RuleFile, output_folder: Path) -> None:
     renderer.render_proton_email_rules_file(rule_file.rules, output_folder / rule_file.file_name)
+
+
+EMAIL_ACCOUNT_SETTINGS = EmailAccountSettings(
+    folders=list(Folders.iterate_values()),
+    tags=list(Tags.iterate_values()),
+    rule_files=RULE_FILES,
+)
 
 
 if __name__ == "__main__":
