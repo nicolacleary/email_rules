@@ -9,27 +9,35 @@ from email_rules.simulation_framework import EmailRuleSimulation
 # Validating rule behaviour
 
 
-class TestExample2:
-    @pytest.fixture
-    def email(self) -> Email:
-        return Email(
-            email_from=EmailFrom(EmailAddress("test@example.com")),
-            email_to=[EmailTo(EmailAddress("email@example.com"))],
-            email_subject=EmailSubject("Some Example Email"),
-        )
+def create_email(
+    email_from: EmailFrom | None = None,
+    email_to: list[EmailTo] | None = None,
+    email_subject: EmailSubject | None = None,
+) -> Email:
+    return Email(
+        email_from=email_from or EmailFrom(EmailAddress("test@example.com")),
+        email_to=email_to or [EmailTo(EmailAddress("email@example.com"))],
+        email_subject=email_subject or EmailSubject("Some Example Email"),
+    )
 
-    def test_tagging(self, email: Email) -> None:
-        email.email_from = EmailFrom(EmailAddress("other-address@example.com"))
+
+class TestExample2:
+    def test_tagging(self) -> None:
+        email = create_email(email_from=EmailFrom(EmailAddress("other-address@example.com")))
         with EmailRuleSimulation(inbox=EXAMPLE_2_ACCOUNT_SETTINGS, email=email) as email_final_state:
             email_final_state.assert_has_tag(EXAMPLE_2_TAGS.SOME_TAG)
 
-    def test_moving(self, email: Email) -> None:
-        email.email_subject = EmailSubject("Won't be tagged")
+    def test_moving(self) -> None:
+        email = create_email(email_subject=EmailSubject("Won't be tagged"))
         with EmailRuleSimulation(inbox=EXAMPLE_2_ACCOUNT_SETTINGS, email=email) as email_final_state:
             email_final_state.assert_is_moved_to(EXAMPLE_2_FOLDERS.SOME_FOLDER)
 
     @pytest.mark.xfail(reason="The rule that adds the tag prevents further rules from being processed")
-    def test_tagging_and_moving_same_email(self, email: Email) -> None:
+    def test_tagging_and_moving_same_email(self) -> None:
+        email = create_email(
+            email_from=EmailFrom(EmailAddress("other-address@example.com")),
+            email_subject=EmailSubject("Won't be tagged"),
+        )
         with EmailRuleSimulation(inbox=EXAMPLE_2_ACCOUNT_SETTINGS, email=email) as email_final_state:
             email_final_state.assert_has_tag(EXAMPLE_2_TAGS.SOME_TAG)
             email_final_state.assert_is_moved_to(EXAMPLE_2_FOLDERS.SOME_FOLDER)
